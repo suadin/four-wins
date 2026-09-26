@@ -19,6 +19,10 @@ via GitHub Actions â†’ GitHub Pages.
 diagonally â€” wins. Winning discs are highlighted. Click **New game** to restart
 (switching modes also resets the board).
 
+**Bonus win:** a filled **2x2 block** of your own discs also wins. A line of four is
+reported first when a single move achieves both.
+
+
 ## Tech stack
 
 - **Angular 22** â€” standalone components, zoneless change detection, new control flow

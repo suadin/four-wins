@@ -1,7 +1,15 @@
 import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import { createEmptyBoard, dropPiece, findWin, getBestMove, isBoardFull, opponent } from './game-logic';
-import { Board, CellPosition, GameMode, GameStatus, Player } from './game.types';
+import {
+  BLOCK_SIZE,
+  createEmptyBoard,
+  dropPiece,
+  findWin,
+  getBestMove,
+  isBoardFull,
+  opponent,
+} from './game-logic';
+import { Board, CellPosition, GameMode, GameStatus, Player, WinType } from './game.types';
 
 export interface GameState {
   board: Board;
@@ -10,6 +18,7 @@ export interface GameState {
   status: GameStatus;
   winner: Player | null;
   winningCells: CellPosition[];
+  winType: WinType | null;
   aiThinking: boolean;
   moveCount: number;
 }
@@ -21,6 +30,7 @@ const initialState: GameState = {
   status: 'playing',
   winner: null,
   winningCells: [],
+  winType: null,
   aiThinking: false,
   moveCount: 0,
 };
@@ -30,16 +40,19 @@ const AI_MOVE_DELAY_MS = 500;
 export const GameStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ status, winner, currentPlayer, mode, aiThinking }) => ({
+  withComputed(({ status, winner, currentPlayer, mode, aiThinking, winType }) => ({
     canPlay: computed(
       () => status() === 'playing' && !aiThinking() && !(mode() === 'ai' && currentPlayer() === 2),
     ),
     statusMessage: computed(() => {
       if (status() === 'won') {
+        const suffix = winType() === 'block' ? ` (${BLOCK_SIZE}x${BLOCK_SIZE} block)` : '';
         if (mode() === 'ai') {
-          return winner() === 1 ? 'You win! Well played.' : 'The AI wins this round.';
+          return winner() === 1
+            ? `You win! Well played.${suffix}`
+            : `The AI wins this round.${suffix}`;
         }
-        return `Player ${winner()} (${winner() === 1 ? 'red' : 'yellow'}) wins!`;
+        return `Player ${winner()} (${winner() === 1 ? 'red' : 'yellow'}) wins!${suffix}`;
       }
       if (status() === 'draw') {
         return "It's a draw - the board is full.";
@@ -57,15 +70,16 @@ export const GameStore = signalStore(
       if (!result) {
         return;
       }
-      const winningCells = findWin(result.board, player);
-      const draw = !winningCells && isBoardFull(result.board);
+      const win = findWin(result.board, player);
+      const draw = !win && isBoardFull(result.board);
       patchState(store, {
         board: result.board,
         moveCount: store.moveCount() + 1,
-        status: winningCells ? 'won' : draw ? 'draw' : 'playing',
-        winner: winningCells ? player : null,
-        winningCells: winningCells ?? [],
-        currentPlayer: winningCells || draw ? player : opponent(player),
+        status: win ? 'won' : draw ? 'draw' : 'playing',
+        winner: win ? player : null,
+        winningCells: win ? win.cells : [],
+        winType: win ? win.type : null,
+        currentPlayer: win || draw ? player : opponent(player),
       });
     };
 

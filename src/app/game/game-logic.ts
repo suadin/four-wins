@@ -1,7 +1,13 @@
-import { Board, Cell, CellPosition, COLS, Player, ROWS } from './game.types';
+import { Board, Cell, CellPosition, COLS, Player, ROWS, Win } from './game.types';
 
 /** Search depth for the minimax AI. 6 gives a strong opponent with <150 ms response time. */
 export const AI_DEPTH = 6;
+
+/** Edge length of the square that also wins, next to four in a row. */
+export const BLOCK_SIZE = 2;
+
+/** Number of discs a block needs, i.e. BLOCK_SIZE squared. */
+const BLOCK_CELLS = BLOCK_SIZE * BLOCK_SIZE;
 
 /** Center-first move ordering improves alpha-beta pruning and prefers strong center play. */
 const MOVE_ORDER = [3, 2, 4, 1, 5, 0, 6];
@@ -55,8 +61,8 @@ export function dropPiece(board: Board, col: number, player: Player): { board: B
   return { board: next, row };
 }
 
-/** Returns the four winning cell positions for the player, or null if there is no win. */
-export function findWin(board: Board, player: Player): CellPosition[] | null {
+/** Returns the four winning cell positions for the player, or null if there is no line. */
+export function findLine(board: Board, player: Player): CellPosition[] | null {
   for (let row = 0; row < ROWS; row++) {
     for (let col = 0; col < COLS; col++) {
       if (board[row][col] !== player) {
@@ -87,6 +93,48 @@ export function findWin(board: Board, player: Player): CellPosition[] | null {
   return null;
 }
 
+/**
+ * Returns the cell positions of a filled BLOCK_SIZE square for the player,
+ * or null if there is none.
+ */
+export function findBlock(board: Board, player: Player): CellPosition[] | null {
+  for (let row = 0; row <= ROWS - BLOCK_SIZE; row++) {
+    for (let col = 0; col <= COLS - BLOCK_SIZE; col++) {
+      const cells: CellPosition[] = [];
+      let filled = true;
+      for (let dr = 0; dr < BLOCK_SIZE && filled; dr++) {
+        for (let dc = 0; dc < BLOCK_SIZE; dc++) {
+          if (board[row + dr][col + dc] !== player) {
+            filled = false;
+            break;
+          }
+          cells.push([row + dr, col + dc]);
+        }
+      }
+      if (filled) {
+        return cells;
+      }
+    }
+  }
+  return null;
+}
+
+/**
+ * Returns the winning cells for the player, or null if there is no win.
+ * A line of four takes precedence over a block when a single move achieves both.
+ */
+export function findWin(board: Board, player: Player): Win | null {
+  const line = findLine(board, player);
+  if (line) {
+    return { type: 'line', cells: line };
+  }
+  const block = findBlock(board, player);
+  if (block) {
+    return { type: 'block', cells: block };
+  }
+  return null;
+}
+
 export function isBoardFull(board: Board): boolean {
   return getValidColumns(board).length === 0;
 }
@@ -102,6 +150,23 @@ function scoreWindow(window: Cell[], player: Player): number {
   if (mine === 2 && empty === 2) return 10;
   if (theirs === 3 && empty === 1) return -80;
   if (theirs === 2 && empty === 2) return -5;
+  return 0;
+}
+
+/**
+ * Scores a single BLOCK_SIZE square window. A completed block is worth as much as a line,
+ * but a one-disc-short threat counts for less than a line threat because it is covered by
+ * several overlapping windows at once.
+ */
+function scoreBlockWindow(window: Cell[], player: Player): number {
+  const other = opponent(player);
+  const mine = window.filter((cell) => cell === player).length;
+  const theirs = window.filter((cell) => cell === other).length;
+
+  if (mine === BLOCK_CELLS) return 100_000;
+  if (theirs === BLOCK_CELLS) return -100_000;
+  if (mine === BLOCK_CELLS - 1) return 40;
+  if (theirs === BLOCK_CELLS - 1) return -70;
   return 0;
 }
 
@@ -145,6 +210,21 @@ export function scorePosition(board: Board, player: Player): number {
     for (let col = 3; col < COLS; col++) {
       score += scoreWindow(
         [board[row][col], board[row + 1][col - 1], board[row + 2][col - 2], board[row + 3][col - 3]],
+        player,
+      );
+    }
+  }
+
+  // Square windows
+  for (let row = 0; row <= ROWS - BLOCK_SIZE; row++) {
+    for (let col = 0; col <= COLS - BLOCK_SIZE; col++) {
+      score += scoreBlockWindow(
+        [
+          board[row][col],
+          board[row][col + 1],
+          board[row + 1][col],
+          board[row + 1][col + 1],
+        ],
         player,
       );
     }
