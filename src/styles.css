@@ -1,0 +1,16 @@
+/* Global styles */
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(47, 128, 237, 0.25), transparent 60%),
+    radial-gradient(900px 500px at 10% 110%, rgba(230, 57, 70, 0.18), transparent 60%),
+    #0b1220;
+  color: #e4eaf1;
+  min-height: 100vh;
+}

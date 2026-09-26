@@ -1,0 +1,304 @@
+openapi: 3.1.0
+info:
+  title: Four Wins Game API
+  version: 1.0.0
+  summary: API documentation for the Four Wins (Connect Four) game engine.
+  description: >
+    Formal OpenAPI definition of the Four Wins game domain. The shipped application
+    is a pure client-side Angular app whose engine lives in
+    `src/app/game/game-logic.ts`; this document describes the same API surface so it
+    can be reused for a future backend or multiplayer service.
+
+    **Board model:** 7 columns x 6 rows. A cell is `0` (empty), `1` (player one, red)
+    or `2` (player two / AI, yellow). Rows are indexed top-to-bottom (`0..5`),
+    columns left-to-right (`0..6`). A disc always falls to the lowest free row of
+    the chosen column. A player wins by connecting four discs horizontally,
+    vertically or diagonally.
+  license:
+    name: MIT
+
+servers:
+  - url: https://api.example.com/four-wins/v1
+    description: Conceptual endpoint (the current app runs 100% client-side)
+
+tags:
+  - name: games
+    description: Lifecycle of a Four Wins game
+
+paths:
+  /games:
+    post:
+      tags: [games]
+      summary: Create a new game
+      operationId: createGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewGameRequest'
+      responses:
+        '201':
+          description: Game created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /games/{gameId}:
+    get:
+      tags: [games]
+      summary: Read the current state of a game
+      operationId: getGame
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      responses:
+        '200':
+          description: Current game state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [games]
+      summary: Abandon and delete a game
+      operationId: deleteGame
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      responses:
+        '204':
+          description: Game deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /games/{gameId}/moves:
+    get:
+      tags: [games]
+      summary: List all moves played so far
+      operationId: listMoves
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      responses:
+        '200':
+          description: Ordered list of moves (first move is index 0).
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Move'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags: [games]
+      summary: Drop a disc into a column
+      description: >
+        Plays a move for the player whose turn it is. In `ai` mode the AI's reply
+        move is applied immediately after a valid human move and included in the
+        response.
+      operationId: playMove
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoveRequest'
+      responses:
+        '200':
+          description: Updated game state after the move (and the AI reply, if any).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The move is illegal (column full, or game already finished).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameError'
+
+components:
+  parameters:
+    GameId:
+      name: gameId
+      in: path
+      required: true
+      description: Unique identifier of the game.
+      schema:
+        type: string
+        format: uuid
+
+  responses:
+    BadRequest:
+      description: The request is malformed (e.g. column index out of range).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GameError'
+    NotFound:
+      description: No game with the given id exists.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/GameError'
+
+  schemas:
+    Player:
+      type: integer
+      enum: [1, 2]
+      description: Player one (red, starts) or player two (yellow; the AI in `ai` mode).
+
+    GameMode:
+      type: string
+      enum: [pvp, ai]
+      description: '`pvp`: local two-player. `ai`: human (1) versus AI (2).'
+
+    GameStatus:
+      type: string
+      enum: [playing, won, draw]
+
+    Cell:
+      type: integer
+      enum: [0, 1, 2]
+      description: 0 = empty, otherwise the owning player.
+
+    Board:
+      type: array
+      description: 6 rows (top to bottom) of 7 cells.
+      minItems: 6
+      maxItems: 6
+      items:
+        type: array
+        minItems: 7
+        maxItems: 7
+        items:
+          $ref: '#/components/schemas/Cell'
+      example:
+        - [0, 0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0, 0]
+        - [0, 0, 0, 0, 0, 0, 0]
+        - [0, 0, 1, 2, 0, 0, 0]
+        - [0, 1, 2, 1, 2, 0, 0]
+
+    CellPosition:
+      type: array
+      description: '[row, column] position on the board.'
+      minItems: 2
+      maxItems: 2
+      items:
+        type: integer
+        minimum: 0
+        maximum: 6
+      example: [5, 3]
+
+    NewGameRequest:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          $ref: '#/components/schemas/GameMode'
+      example:
+        mode: ai
+
+    MoveRequest:
+      type: object
+      required: [column]
+      properties:
+        column:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: Target column (0-based). The disc lands on the lowest free row.
+      example:
+        column: 3
+
+    Move:
+      type: object
+      required: [sequence, player, column, row]
+      properties:
+        sequence:
+          type: integer
+          minimum: 1
+          description: 1-based index of the move within the game.
+        player:
+          $ref: '#/components/schemas/Player'
+        column:
+          type: integer
+          minimum: 0
+          maximum: 6
+        row:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Row the disc landed on.
+      example:
+        sequence: 1
+        player: 1
+        column: 3
+        row: 5
+
+    Game:
+      type: object
+      required: [id, mode, board, currentPlayer, status, winner, winningCells, moveCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        mode:
+          $ref: '#/components/schemas/GameMode'
+        board:
+          $ref: '#/components/schemas/Board'
+        currentPlayer:
+          $ref: '#/components/schemas/Player'
+        status:
+          $ref: '#/components/schemas/GameStatus'
+        winner:
+          anyOf:
+            - $ref: '#/components/schemas/Player'
+            - type: 'null'
+          description: Winning player when `status` is `won`, otherwise null.
+        winningCells:
+          type: array
+          description: The four connected cells when `status` is `won`, otherwise empty.
+          items:
+            $ref: '#/components/schemas/CellPosition'
+        moveCount:
+          type: integer
+          minimum: 0
+      example:
+        id: 3f6b6a2e-9b7c-4f1a-8f2d-1a2b3c4d5e6f
+        mode: ai
+        board:
+          - [0, 0, 0, 0, 0, 0, 0]
+          - [0, 0, 0, 0, 0, 0, 0]
+          - [0, 0, 0, 0, 0, 0, 0]
+          - [0, 0, 0, 0, 0, 0, 0]
+          - [0, 0, 0, 1, 0, 0, 0]
+          - [0, 0, 2, 1, 0, 0, 0]
+        currentPlayer: 1
+        status: playing
+        winner: null
+        winningCells: []
+        moveCount: 3
+
+    GameError:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: COLUMN_FULL
+        message:
+          type: string
+          example: Column 3 is already full.

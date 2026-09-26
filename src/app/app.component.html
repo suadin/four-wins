@@ -1,0 +1,68 @@
+<main class="game-shell">
+  <header class="game-header">
+    <h1>Four Wins</h1>
+    <p class="subtitle">Connect four discs in a row &mdash; horizontally, vertically or diagonally.</p>
+
+    <div class="mode-switch" role="group" aria-label="Game mode">
+      <button
+        type="button"
+        [class.active]="store.mode() === 'pvp'"
+        (click)="store.selectMode('pvp')"
+      >
+        1 VS 1
+      </button>
+      <button
+        type="button"
+        [class.active]="store.mode() === 'ai'"
+        (click)="store.selectMode('ai')"
+      >
+        VS AI
+      </button>
+    </div>
+  </header>
+
+  <p
+    class="status"
+    role="status"
+    aria-live="polite"
+    [class.won]="store.status() === 'won'"
+    [class.draw]="store.status() === 'draw'"
+  >
+    {{ store.statusMessage() }}
+  </p>
+
+  <div class="board" role="grid" aria-label="Four Wins board">
+    @for (col of columnIndexes; track col) {
+      <button
+        type="button"
+        class="column"
+        role="row"
+        [disabled]="!store.canPlay()"
+        [attr.aria-label]="'Drop a disc into column ' + (col + 1)"
+        (click)="store.playColumn(col)"
+        (mouseenter)="hoveredColumn.set(col)"
+        (mouseleave)="hoveredColumn.set(null)"
+        (focus)="hoveredColumn.set(col)"
+        (blur)="hoveredColumn.set(null)"
+      >
+        @for (row of rowIndexes; track row) {
+          <span
+            class="cell"
+            role="gridcell"
+            [class.p1]="store.board()[row][col] === 1"
+            [class.p2]="store.board()[row][col] === 2"
+            [class.win]="isWinningCell(row, col)"
+            [class.preview-p1]="row === previewRow() && store.currentPlayer() === 1"
+            [class.preview-p2]="row === previewRow() && store.currentPlayer() === 2"
+          ></span>
+        }
+      </button>
+    }
+  </div>
+
+  <button type="button" class="restart" (click)="store.reset()">New game</button>
+
+  <footer class="game-footer">
+    <span>Angular {{ angularVersion }} &middot; Signals &middot; NgRx Signal Store</span>
+  </footer>
+</main>
