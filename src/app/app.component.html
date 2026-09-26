@@ -52,8 +52,8 @@
             [class.p1]="store.board()[row][col] === 1"
             [class.p2]="store.board()[row][col] === 2"
             [class.win]="isWinningCell(row, col)"
-            [class.preview-p1]="row === previewRow() && store.currentPlayer() === 1"
-            [class.preview-p2]="row === previewRow() && store.currentPlayer() === 2"
+            [class.preview-p1]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1"
+            [class.preview-p2]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2"
           ></span>
         }
       </button>
