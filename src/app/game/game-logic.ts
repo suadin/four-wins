@@ -21,6 +21,18 @@ const DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
   [1, -1], // diagonal down-left
 ];
 
+/** Offsets of the eight cells around a disc, which the dark power disc can convert. */
+const NEIGHBOURS: ReadonlyArray<readonly [number, number]> = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
+
 export function createEmptyBoard(): Board {
   return Array.from({ length: ROWS }, () => Array<Cell>(COLS).fill(0));
 }
@@ -59,6 +71,37 @@ export function dropPiece(board: Board, col: number, player: Player): { board: B
     rowIndex === row ? cells.map((cell, colIndex) => (colIndex === col ? player : cell)) : cells.slice(),
   );
   return { board: next, row };
+}
+
+/** Returns the enemy discs in the eight cells around (row, col). Empty cells are ignored. */
+export function findEnemyNeighbours(board: Board, row: number, col: number, player: Player): CellPosition[] {
+  const other = opponent(player);
+  const cells: CellPosition[] = [];
+  for (const [dr, dc] of NEIGHBOURS) {
+    const neighbourRow = row + dr;
+    const neighbourCol = col + dc;
+    if (neighbourRow < 0 || neighbourRow >= ROWS || neighbourCol < 0 || neighbourCol >= COLS) {
+      continue;
+    }
+    if (board[neighbourRow][neighbourCol] === other) {
+      cells.push([neighbourRow, neighbourCol]);
+    }
+  }
+  return cells;
+}
+
+/** Returns a new board in which every enemy disc around (row, col) now belongs to `player`. */
+export function convertNeighbours(board: Board, row: number, col: number, player: Player): Board {
+  const other = opponent(player);
+  return board.map((cells, rowIndex) =>
+    cells.map((cell, colIndex) => {
+      if (cell !== other) {
+        return cell;
+      }
+      const isNeighbour = Math.abs(rowIndex - row) <= 1 && Math.abs(colIndex - col) <= 1;
+      return isNeighbour ? player : cell;
+    }),
+  );
 }
 
 /** Returns the four winning cell positions for the player, or null if there is no line. */
@@ -323,4 +366,81 @@ export function getBestMove(board: Board, aiPlayer: Player): number {
     return column;
   }
   return validColumns[Math.floor(Math.random() * validColumns.length)];
+}
+
+/** What the AI decided to do on its turn. */
+export interface AiAction {
+  kind: 'drop' | 'dark' | 'activate';
+  /** Target column for `drop` and `dark`, -1 for `activate`. */
+  column: number;
+  /** Position of the armed dark disc for `activate`, null otherwise. */
+  cell: CellPosition | null;
+}
+
+/**
+ * Heuristic value the AI attributes to an enemy disc that its dark disc would convert later.
+ * Used to decide whether arming the dark disc next to enemy discs pays for a weaker move now.
+ */
+const DARK_CONVERSION_VALUE = 30;
+
+/**
+ * Decides what the AI does on its turn: a normal drop, arming its dark power disc, or
+ * using the dark disc it has already armed.
+ *
+ * The dark disc only matters to the player who owns it, so it is kept out of the minimax
+ * search. Instead the AI compares the plain heuristic value of the resulting positions and
+ * treats the conversion potential of the armed disc as a bonus while deciding where to put it.
+ *
+ * @param armed Position of the AI's armed dark disc, or null when it has none on the board.
+ * @param canArm True while the AI still has its dark disc unused and unarmed.
+ */
+export function getAiAction(
+  board: Board,
+  aiPlayer: Player,
+  armed: CellPosition | null,
+  canArm: boolean,
+): AiAction | null {
+  const validColumns = getValidColumns(board);
+
+  for (const col of validColumns) {
+    const result = dropPiece(board, col, aiPlayer);
+    if (result && findWin(result.board, aiPlayer)) {
+      return { kind: 'drop', column: col, cell: null };
+    }
+  }
+
+  const normalColumn = getBestMove(board, aiPlayer);
+  const normalDrop = normalColumn >= 0 ? dropPiece(board, normalColumn, aiPlayer) : null;
+  const normalValue = normalDrop ? scorePosition(normalDrop.board, aiPlayer) : -Infinity;
+
+  if (armed && findEnemyNeighbours(board, armed[0], armed[1], aiPlayer).length > 0) {
+    const converted = convertNeighbours(board, armed[0], armed[1], aiPlayer);
+    if (findWin(converted, aiPlayer) || scorePosition(converted, aiPlayer) > normalValue) {
+      return { kind: 'activate', column: -1, cell: [armed[0], armed[1]] };
+    }
+  }
+
+  if (canArm && normalDrop) {
+    let bestDark: { column: number; value: number } | null = null;
+    for (const col of MOVE_ORDER) {
+      const row = getAvailableRow(board, col);
+      const result = dropPiece(board, col, aiPlayer);
+      if (!result) {
+        continue;
+      }
+      const threatened = findEnemyNeighbours(board, row, col, aiPlayer).length;
+      if (threatened === 0) {
+        continue;
+      }
+      const value = scorePosition(result.board, aiPlayer) + threatened * DARK_CONVERSION_VALUE;
+      if (!bestDark || value > bestDark.value) {
+        bestDark = { column: col, value };
+      }
+    }
+    if (bestDark && bestDark.value > normalValue) {
+      return { kind: 'dark', column: bestDark.column, cell: null };
+    }
+  }
+
+  return normalDrop ? { kind: 'drop', column: normalColumn, cell: null } : null;
 }

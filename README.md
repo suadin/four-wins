@@ -22,6 +22,14 @@ diagonally â€” wins. Winning discs are highlighted. Click **New game** to r
 **Bonus win:** a filled **2x2 block** of your own discs also wins. A line of four is
 reported first when a single move achieves both.
 
+**Dark power disc:** every player gets **one dark disc** per game, dark red for red and dark
+yellow for yellow. **Right-click** a column to drop it, or use the **Dark drop** button on
+touch devices. Click the dark disc to use it: every opposing disc in the eight cells around
+it becomes yours, the dark disc itself turns into a normal disc, and the power is gone for
+the rest of the game. Using it costs a move, and it does nothing at all when no opposing
+disc is around it. The two side indicators next to the board show who still holds their dark
+disc. The AI plays by the same rule and spends its own disc when the position pays off.
+
 
 ## Tech stack
 
@@ -29,7 +37,8 @@ reported first when a single move achieves both.
 - **Signals + NgRx Signal Store** (`@ngrx/signals`) for the reactive game state
   (`src/app/game/game.store.ts`)
 - Pure, side-effect-free TypeScript game engine (`src/app/game/game-logic.ts`)
-- AI: alpha-beta minimax with heuristic board evaluation (center preference, window scoring)
+- AI: alpha-beta minimax with heuristic board evaluation (center preference, window scoring),
+  plus a heuristic decision on when to arm and when to spend its own dark power disc
 - CI/CD: GitHub Actions workflow deploying to GitHub Pages (`.github/workflows/deploy.yml`)
 
 ## Run locally

@@ -34,36 +34,71 @@
     {{ store.statusMessage() }}
   </p>
 
-  <div class="board" role="grid" aria-label="Four Wins board">
-    @for (col of columnIndexes; track col) {
-      <button
-        type="button"
-        class="column"
-        role="row"
-        [disabled]="!store.canPlay()"
-        [attr.aria-label]="'Drop a disc into column ' + (col + 1)"
-        (click)="store.playColumn(col)"
-        (mouseenter)="hoveredColumn.set(col)"
-        (mouseleave)="hoveredColumn.set(null)"
-        (focus)="hoveredColumn.set(col)"
-        (blur)="hoveredColumn.set(null)"
-      >
-        @for (row of rowIndexes; track row) {
-          <span
-            class="cell"
-            role="gridcell"
-            [class.p1]="store.board()[row][col] === 1"
-            [class.p2]="store.board()[row][col] === 2"
-            [class.win]="isWinningCell(row, col)"
-            [class.preview-p1]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1"
-            [class.preview-p2]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2"
-          ></span>
-        }
-      </button>
-    }
+  <div class="board-area">
+    <aside class="power p1" [class.spent]="powerView(1) === 'spent'">
+      <span class="power-disc"></span>
+      <span class="power-text">{{ powerLabel(1) }}</span>
+    </aside>
+
+    <div class="board" role="grid" aria-label="Four Wins board">
+      @for (col of columnIndexes; track col) {
+        <button
+          type="button"
+          class="column"
+          role="row"
+          [disabled]="!store.canPlay()"
+          [attr.aria-label]="'Drop a disc into column ' + (col + 1)"
+          (click)="onColumnClick(col)"
+          (contextmenu)="onContextMenu($event, col)"
+          (mouseenter)="hoveredColumn.set(col)"
+          (mouseleave)="hoveredColumn.set(null)"
+          (focus)="hoveredColumn.set(col)"
+          (blur)="hoveredColumn.set(null)"
+        >
+          @for (row of rowIndexes; track row) {
+            <span
+              class="cell"
+              role="gridcell"
+              [class.p1]="store.board()[row][col] === 1"
+              [class.p2]="store.board()[row][col] === 2"
+              [class.dark-p1]="isDarkDisc(row, col) && store.board()[row][col] === 1"
+              [class.dark-p2]="isDarkDisc(row, col) && store.board()[row][col] === 2"
+              [class.armed]="isUsableDarkDisc(row, col)"
+              [class.win]="isWinningCell(row, col)"
+              [class.preview-p1]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1"
+              [class.preview-p2]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2"
+              [attr.title]="isUsableDarkDisc(row, col) ? 'Click to convert the eight discs around it' : null"
+              (click)="onCellClick($event, row, col)"
+            ></span>
+          }
+        </button>
+      }
+    </div>
+
+    <aside class="power p2" [class.spent]="powerView(2) === 'spent'">
+      <span class="power-disc"></span>
+      <span class="power-text">{{ powerLabel(2) }}</span>
+    </aside>
   </div>
 
-  <button type="button" class="restart" (click)="store.reset()">New game</button>
+  <p class="hint">
+    Right-click a column to drop your one dark disc. Click the dark disc to turn every opposing
+    disc around it into yours &mdash; then it is a normal disc and you have used it up.
+  </p>
+
+  <div class="controls">
+    <button
+      type="button"
+      class="dark-toggle"
+      [class.active]="darkDropMode() && store.hasDarkDisc()"
+      [disabled]="!store.canPlay() || !store.hasDarkDisc()"
+      (click)="toggleDarkDrop()"
+    >
+      Dark drop
+    </button>
+
+    <button type="button" class="restart" (click)="store.reset()">New game</button>
+  </div>
 
   <footer class="game-footer">
     <span>Angular {{ angularVersion }} &middot; Signals &middot; NgRx Signal Store</span>

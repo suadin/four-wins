@@ -15,6 +15,12 @@ info:
     the chosen column. A player wins by connecting four discs horizontally,
     vertically or diagonally, or by filling a 2x2 block. A line of four is reported
     as the win when a single move achieves both.
+
+    **Dark power disc:** every player holds one dark disc per game, dropped like a normal
+    disc but in a dark shade of the own colour (`dark-moves` below). Clicking it converts
+    every opposing disc in the eight surrounding cells to the owner, after which the disc is
+    a normal disc and the power is spent (`.../power/activate`). A conversion costs a move
+    and is rejected when no opposing disc surrounds the disc.
   license:
     name: MIT
 
@@ -128,6 +134,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/GameError'
 
+  /games/{gameId}/dark-moves:
+    post:
+      tags: [games]
+      summary: Drop the one-time dark power disc into a column
+      description: >
+        Plays a move for the player whose turn it is, but the disc that lands is marked dark
+        and can still be converted once. Rejected when the player already armed or spent their
+        dark disc, or when the column is full.
+      operationId: playDarkMove
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DarkMoveRequest'
+      responses:
+        '200':
+          description: Updated game state after the dark move (and the AI reply, if any).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The move is illegal (column full, dark disc already used, or game over).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameError'
+
+  /games/{gameId}/power/activate:
+    post:
+      tags: [games]
+      summary: Use the armed dark disc
+      description: >
+        Converts every opposing disc in the eight cells around the caller's armed dark disc,
+        the disc then counts as a normal disc and the power is spent. The activation costs a
+        move. Rejected when the position holds no armed dark disc of the caller, or when no
+        opposing disc surrounds it.
+      operationId: activateDarkDisc
+      parameters:
+        - $ref: '#/components/parameters/GameId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivateRequest'
+      responses:
+        '200':
+          description: Updated game state after the conversion (and the AI reply, if any).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: The activation is illegal (nothing to convert, or game over).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GameError'
+
 components:
   parameters:
     GameId:
@@ -208,6 +285,51 @@ components:
         maximum: 6
       example: [5, 3]
 
+    PowerState:
+      type: object
+      required: [armed, spent]
+      properties:
+        armed:
+          anyOf:
+            - $ref: '#/components/schemas/CellPosition'
+            - type: 'null'
+          description: Position of the dark disc that is on the board and still to be used, otherwise null.
+        spent:
+          type: boolean
+          description: True once the dark disc has been dropped dark or already converted with.
+      example:
+        armed: [5, 3]
+        spent: true
+
+    DarkMoveRequest:
+      type: object
+      required: [column]
+      properties:
+        column:
+          type: integer
+          minimum: 0
+          maximum: 6
+          description: Target column (0-based). The dark disc lands on the lowest free row.
+      example:
+        column: 3
+
+    ActivateRequest:
+      type: object
+      required: [row, column]
+      properties:
+        row:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Row of the armed dark disc of the player whose turn it is.
+        column:
+          type: integer
+          minimum: 0
+          maximum: 6
+      example:
+        row: 5
+        column: 3
+
     NewGameRequest:
       type: object
       required: [mode]
@@ -256,7 +378,7 @@ components:
 
     Game:
       type: object
-      required: [id, mode, board, currentPlayer, status, winner, winningCells, winType, moveCount]
+      required: [id, mode, board, currentPlayer, status, winner, winningCells, winType, moveCount, powers]
       properties:
         id:
           type: string
@@ -287,6 +409,15 @@ components:
         moveCount:
           type: integer
           minimum: 0
+        powers:
+          type: object
+          description: The dark power disc of each player, keyed by player number.
+          required: ['1', '2']
+          properties:
+            '1':
+              $ref: '#/components/schemas/PowerState'
+            '2':
+              $ref: '#/components/schemas/PowerState'
       example:
         id: 3f6b6a2e-9b7c-4f1a-8f2d-1a2b3c4d5e6f
         mode: ai
@@ -303,6 +434,13 @@ components:
         winningCells: []
         winType: null
         moveCount: 3
+        powers:
+          '1':
+            armed: null
+            spent: false
+          '2':
+            armed: [4, 2]
+            spent: true
 
     GameError:
       type: object
