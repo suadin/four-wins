@@ -67,7 +67,7 @@
               [class.win]="isWinningCell(row, col)"
               [class.preview-p1]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1"
               [class.preview-p2]="row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2"
-              [attr.title]="isUsableDarkDisc(row, col) ? 'Click to convert the eight discs around it' : null"
+              [attr.title]="isUsableDarkDisc(row, col) ? 'Click to convert one disc around it' : null"
               (click)="onCellClick($event, row, col)"
             ></span>
           }
@@ -82,8 +82,9 @@
   </div>
 
   <p class="hint">
-    Right-click a column to drop your one dark disc. Click the dark disc to turn every opposing
-    disc around it into yours &mdash; then it is a normal disc and you have used it up.
+    Right-click a column to drop your one dark disc. Click the dark disc to turn one opposing disc
+    around it into yours &mdash; the best placed one. That costs a move, the dark disc is then a
+    normal disc and your power is gone.
   </p>
 
   <div class="controls">

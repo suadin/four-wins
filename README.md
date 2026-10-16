@@ -24,11 +24,12 @@ reported first when a single move achieves both.
 
 **Dark power disc:** every player gets **one dark disc** per game, dark red for red and dark
 yellow for yellow. **Right-click** a column to drop it, or use the **Dark drop** button on
-touch devices. Click the dark disc to use it: every opposing disc in the eight cells around
-it becomes yours, the dark disc itself turns into a normal disc, and the power is gone for
-the rest of the game. Using it costs a move, and it does nothing at all when no opposing
-disc is around it. The two side indicators next to the board show who still holds their dark
-disc. The AI plays by the same rule and spends its own disc when the position pays off.
+touch devices. Click the dark disc to use it: **one** opposing disc from the eight cells around
+it becomes yours, namely the one whose conversion is worth the most. The click costs a move,
+the dark disc itself turns into a normal disc, and the power is gone for the rest of the game.
+It does nothing at all when no opposing disc is around it. The two side indicators next to the
+board show who still holds their dark disc. The AI plays by the same rule and spends its own
+disc when the position pays off.
 
 
 ## Tech stack

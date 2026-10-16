@@ -18,9 +18,10 @@ info:
 
     **Dark power disc:** every player holds one dark disc per game, dropped like a normal
     disc but in a dark shade of the own colour (`dark-moves` below). Clicking it converts
-    every opposing disc in the eight surrounding cells to the owner, after which the disc is
-    a normal disc and the power is spent (`.../power/activate`). A conversion costs a move
-    and is rejected when no opposing disc surrounds the disc.
+    a single opposing disc from the eight surrounding cells to the owner, the one whose
+    conversion is worth the most, after which the disc is a normal disc and the power is
+    spent (`.../power/activate`). The conversion costs a move and is rejected when no
+    opposing disc surrounds the disc.
   license:
     name: MIT
 
@@ -174,10 +175,10 @@ paths:
       tags: [games]
       summary: Use the armed dark disc
       description: >
-        Converts every opposing disc in the eight cells around the caller's armed dark disc,
-        the disc then counts as a normal disc and the power is spent. The activation costs a
-        move. Rejected when the position holds no armed dark disc of the caller, or when no
-        opposing disc surrounds it.
+        Converts a single opposing disc from the eight cells around the caller's armed dark disc
+        to the caller, namely the one whose conversion is worth the most. The disc then counts
+        as a normal disc and the power is spent. The activation costs a move. Rejected when the
+        position holds no armed dark disc of the caller, or when no opposing disc surrounds it.
       operationId: activateDarkDisc
       parameters:
         - $ref: '#/components/parameters/GameId'

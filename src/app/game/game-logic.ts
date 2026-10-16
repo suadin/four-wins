@@ -21,7 +21,7 @@ const DIRECTIONS: ReadonlyArray<readonly [number, number]> = [
   [1, -1], // diagonal down-left
 ];
 
-/** Offsets of the eight cells around a disc, which the dark power disc can convert. */
+/** Offsets of the eight cells around a disc, one of which the dark power disc can convert. */
 const NEIGHBOURS: ReadonlyArray<readonly [number, number]> = [
   [-1, -1],
   [-1, 0],
@@ -90,18 +90,28 @@ export function findEnemyNeighbours(board: Board, row: number, col: number, play
   return cells;
 }
 
-/** Returns a new board in which every enemy disc around (row, col) now belongs to `player`. */
-export function convertNeighbours(board: Board, row: number, col: number, player: Player): Board {
-  const other = opponent(player);
+/** Returns a new board in which the single disc at (row, col) now belongs to `player`. */
+export function convertDisc(board: Board, row: number, col: number, player: Player): Board {
   return board.map((cells, rowIndex) =>
-    cells.map((cell, colIndex) => {
-      if (cell !== other) {
-        return cell;
-      }
-      const isNeighbour = Math.abs(rowIndex - row) <= 1 && Math.abs(colIndex - col) <= 1;
-      return isNeighbour ? player : cell;
-    }),
+    rowIndex === row ? cells.map((cell, colIndex) => (colIndex === col ? player : cell)) : cells.slice(),
   );
+}
+
+/**
+ * Returns the enemy disc around (row, col) that is worth the most to convert, measured by the
+ * board evaluation, or null when no enemy disc surrounds it.
+ */
+export function findConversionTarget(board: Board, row: number, col: number, player: Player): CellPosition | null {
+  let best: CellPosition | null = null;
+  let bestValue = -Infinity;
+  for (const target of findEnemyNeighbours(board, row, col, player)) {
+    const value = scorePosition(convertDisc(board, target[0], target[1], player), player);
+    if (value > bestValue) {
+      bestValue = value;
+      best = target;
+    }
+  }
+  return best;
 }
 
 /** Returns the four winning cell positions for the player, or null if there is no line. */
@@ -378,10 +388,10 @@ export interface AiAction {
 }
 
 /**
- * Heuristic value the AI attributes to an enemy disc that its dark disc would convert later.
+ * Heuristic value the AI attributes to the single enemy disc its dark disc can convert later.
  * Used to decide whether arming the dark disc next to enemy discs pays for a weaker move now.
  */
-const DARK_CONVERSION_VALUE = 30;
+const DARK_CONVERSION_VALUE = 25;
 
 /**
  * Decides what the AI does on its turn: a normal drop, arming its dark power disc, or
@@ -414,7 +424,8 @@ export function getAiAction(
   const normalValue = normalDrop ? scorePosition(normalDrop.board, aiPlayer) : -Infinity;
 
   if (armed && findEnemyNeighbours(board, armed[0], armed[1], aiPlayer).length > 0) {
-    const converted = convertNeighbours(board, armed[0], armed[1], aiPlayer);
+    const target = findConversionTarget(board, armed[0], armed[1], aiPlayer);
+    const converted = target ? convertDisc(board, target[0], target[1], aiPlayer) : board;
     if (findWin(converted, aiPlayer) || scorePosition(converted, aiPlayer) > normalValue) {
       return { kind: 'activate', column: -1, cell: [armed[0], armed[1]] };
     }
@@ -428,11 +439,8 @@ export function getAiAction(
       if (!result) {
         continue;
       }
-      const threatened = findEnemyNeighbours(board, row, col, aiPlayer).length;
-      if (threatened === 0) {
-        continue;
-      }
-      const value = scorePosition(result.board, aiPlayer) + threatened * DARK_CONVERSION_VALUE;
+      const reach = findEnemyNeighbours(board, row, col, aiPlayer).length > 0 ? DARK_CONVERSION_VALUE : 0;
+      const value = scorePosition(result.board, aiPlayer) + reach;
       if (!bestDark || value > bestDark.value) {
         bestDark = { column: col, value };
       }

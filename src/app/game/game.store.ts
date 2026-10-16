@@ -2,10 +2,10 @@ import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import {
   BLOCK_SIZE,
-  convertNeighbours,
+  convertDisc,
   createEmptyBoard,
   dropPiece,
-  findEnemyNeighbours,
+  findConversionTarget,
   findWin,
   getAiAction,
   getBestMove,
@@ -147,16 +147,18 @@ export const GameStore = signalStore(
     };
 
     /**
-     * Turns every enemy disc around the armed dark disc into a disc of `player`, which counts
-     * as a normal disc from then on. Refused when there is no enemy disc to convert, so a
-     * misclick cannot burn the power without doing anything.
+     * Turns the single opposing disc around the armed dark disc that is worth the most into a
+     * disc of `player`, after which the disc counts as a normal one and the power is spent. The
+     * conversion costs a move. Refused when no opposing disc surrounds it, so a misclick cannot
+     * waste the power without doing anything.
      */
     const activateDarkDisc = (player: Player, row: number, col: number): void => {
       const board = store.board();
-      if (findEnemyNeighbours(board, row, col, player).length === 0) {
+      const target = findConversionTarget(board, row, col, player);
+      if (!target) {
         return;
       }
-      const converted = convertNeighbours(board, row, col, player);
+      const converted = convertDisc(board, target[0], target[1], player);
       patchState(store, { powers: pruneArmedDiscs(converted, store.powers(), player) });
       commitBoard(converted, player);
     };
