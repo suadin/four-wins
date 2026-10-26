@@ -30,10 +30,11 @@
             class="reader-section"
             type="button"
             [class.active]="page.slug === currentPage()?.slug"
+            [attr.aria-label]="page.title"
+            [title]="page.title"
+            [innerHTML]="icon(page.title)"
             (click)="openSection(page.slug)"
-          >
-            {{ page.title }}
-          </button>
+          ></button>
         }
       </nav>
       <h3 class="reader-section-title">{{ currentPage()?.title }}</h3>

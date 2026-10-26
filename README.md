@@ -34,7 +34,7 @@ disc when the position pays off.
 ## Documentation and links
 
 - The footer opens this README and the OpenAPI document inside the page, one page per
-  level-two heading. `#/docs/readme` and `#/docs/api` are stable addresses; a reload restores
+  level-two heading, with a row of line icons for the sections. `#/docs/readme` and `#/docs/api` are stable addresses; a reload restores
   the same document and section.
 - The game mode is part of the address: `#/play/pvp` and `#/play/ai`. Opening one starts a
   fresh game in that mode, so a shared link lands in the right mode.
@@ -73,11 +73,11 @@ npm run build      # output: dist/four-wins/browser
 
 ## Tests and metrics
 
-The engine has a unit suite that needs no browser and no test framework beyond Node's own
-runner:
+The engine and the documentation reader have a unit suite that needs no browser and no test
+framework beyond Node's own runner:
 
 ```bash
-npm test           # 13 tests for the pure game engine
+npm test           # 21 tests for the engine and the reader
 npm run metrics    # run them again and write public/test-metrics.json
 ```
 
@@ -100,14 +100,15 @@ src/app/
 ├── app.component.*        # Board UI, mode switch, status display, footer
 ├── app.config.ts          # Zoneless change detection
 ├── docs/
-│   ├── docs.component.*   # In-page README and API reader
-│   └── reader.ts          # Markdown pages, routes, renderer
+│   ├── docs.component.*   # In-page README and API reader, icon sections
+│   └── reader.ts          # Markdown pages, icons, routes, renderer
 └── game/
     ├── game.types.ts      # Board, Player, GameMode, GameStatus types
     ├── game-logic.ts      # Pure engine: drop, win detection, minimax AI
     └── game.store.ts      # NgRx Signal Store (state, computed, methods)
 test/
 ├── game-logic.test.ts     # Node test runner checks for the engine
+├── reader.test.ts         # Reader pages, icons, routes, Markdown
 ├── register.mjs           # Loads the TypeScript resolver
 └── ts-resolver.mjs        # Resolves Angular's extensionless imports
 scripts/

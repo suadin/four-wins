@@ -82,6 +82,43 @@ export function parseRoute(hash: string): Route {
   return { view: 'play', mode: kind === 'play' && first === 'ai' ? 'ai' : 'pvp' };
 }
 
+/**
+ * The icon that stands for a section. Sections are navigated by icons, so the
+ * mapping is data: the tooltip still gives the full heading.
+ */
+const ICON_RULES: ReadonlyArray<readonly [RegExp, string]> = [
+  [/play|start page|spiel/, 'play'],
+  [/install|setup|download/, 'install'],
+  [/game mode|modes/, 'gamepad'],
+  [/tech|stack/, 'layers'],
+  [/run|local/, 'terminal'],
+  [/api/, 'plug'],
+  [/project|structure/, 'tree'],
+  [/test/, 'flask'],
+  [/security|sicher/, 'shield'],
+  [/config|setting|einstellung/, 'sliders'],
+  [/why|reason|own machine/, 'home'],
+  [/deploy|server|host/, 'server'],
+  [/github|pages/, 'pages'],
+  [/how|written|geschrieben/, 'pen'],
+  [/licen[cs]e/, 'scale'],
+  [/feature|does|capab|kann/, 'sparkle'],
+  [/bookmark|supported|source|woher/, 'bookmark'],
+  [/read|chrome|automatic|sync|fresh|helper/, 'sync'],
+  [/export|import/, 'bookmark'],
+  [/documentation|guide|readme|overview|links/, 'book'],
+];
+
+export function iconFor(title: string): string {
+  const text = String(title ?? '').toLowerCase();
+  for (const [pattern, icon] of ICON_RULES) {
+    if (pattern.test(text)) {
+      return icon;
+    }
+  }
+  return 'dot';
+}
+
 export function escapeHtml(value: string): string {
   return String(value)
     .replace(/&/g, '&amp;')

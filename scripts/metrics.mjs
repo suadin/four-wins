@@ -14,7 +14,8 @@ const result = spawnSync(
   [
     '--experimental-strip-types',
     '--import', './test/register.mjs',
-    '--test', '--test-reporter=tap', 'test/game-logic.test.ts',
+    '--test', '--test-reporter=tap',
+    'test/game-logic.test.ts', 'test/reader.test.ts',
   ],
   { cwd: root, encoding: 'utf8' },
 );
