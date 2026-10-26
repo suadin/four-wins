@@ -47,6 +47,16 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "README.md",
+                "input": ".",
+                "output": "/"
+              },
+              {
+                "glob": "openapi.yaml",
+                "input": "docs",
+                "output": "/docs"
               }
             ],
             "styles": [

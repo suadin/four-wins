@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "node --experimental-strip-types --import ./test/register.mjs --test test/game-logic.test.ts",
+    "metrics": "node scripts/metrics.mjs"
   },
   "private": true,
   "packageManager": "npm@11.19.0",

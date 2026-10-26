@@ -17,6 +17,10 @@
   text-align: center;
 
   h1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
     margin: 0;
     font-size: clamp(2rem, 6vw, 3rem);
     font-weight: 800;
@@ -294,9 +298,4 @@
   &:active {
     transform: translateY(0);
   }
-}
-
-.game-footer {
-  color: #5c6b7a;
-  font-size: 0.8rem;
 }

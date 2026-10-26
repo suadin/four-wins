@@ -1,25 +1,117 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, VERSION } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnDestroy,
+  signal,
+} from '@angular/core';
+import { DocsComponent } from './docs/docs.component';
+import { docsHash, parseRoute, playHash } from './docs/reader';
 import { getAvailableRow } from './game/game-logic';
 import { GameStore } from './game/game.store';
-import { COLS, Player, PowerState, ROWS } from './game/game.types';
+import { COLS, GameMode, Player, PowerState, ROWS } from './game/game.types';
 
 type PowerView = 'available' | 'armed' | 'spent';
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  imports: [DocsComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   protected readonly store = inject(GameStore);
-  protected readonly angularVersion = VERSION.full;
+  protected readonly route = signal(parseRoute(location.hash));
+  protected readonly showDocs = computed(() => this.route().view === 'docs');
+  protected readonly docsSlug = computed(() => {
+    const route = this.route();
+    return route.view === 'docs' ? route.doc : 'readme';
+  });
+  protected readonly docsSection = computed(() => {
+    const route = this.route();
+    return route.view === 'docs' ? route.section : null;
+  });
+  protected readonly unitMetrics = signal('unit not measured');
+  protected readonly unitFailed = signal(0);
+  protected readonly unitTip = signal('Run npm run metrics to measure again');
+  protected readonly e2eMetrics = signal('e2e not measured');
   protected readonly hoveredColumn = signal<number | null>(null);
   /** Turns a plain click into a dark drop, for players without a right mouse button. */
   protected readonly darkDropMode = signal(false);
   protected readonly columnIndexes = Array.from({ length: COLS }, (_, index) => index);
   protected readonly rowIndexes = Array.from({ length: ROWS }, (_, index) => index);
+
+  private readonly onHashChange = (): void => this.applyRoute();
+
+  constructor() {
+    window.addEventListener('hashchange', this.onHashChange);
+    this.applyRoute();
+    this.loadMetrics();
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('hashchange', this.onHashChange);
+  }
+
+  protected setMode(mode: GameMode): void {
+    this.store.selectMode(mode);
+    this.navigate(playHash(mode));
+  }
+
+  protected openDocs(): void {
+    this.navigate(docsHash('readme'));
+  }
+
+  protected closeDocs(): void {
+    this.navigate(playHash(this.store.mode()));
+  }
+
+  protected navigate(hash: string): void {
+    if (location.hash === hash) {
+      this.applyRoute();
+      return;
+    }
+    location.hash = hash;
+  }
+
+  private applyRoute(): void {
+    const route = parseRoute(location.hash);
+    this.route.set(route);
+    if (route.view === 'play' && this.store.mode() !== route.mode) {
+      this.store.selectMode(route.mode);
+    }
+  }
+
+  private async loadMetrics(): Promise<void> {
+    try {
+      const response = await fetch('test-metrics.json', { cache: 'no-store' });
+      if (!response.ok) {
+        return;
+      }
+      const metrics = (await response.json()) as {
+        unit?: { total?: number; coverage?: number | null; failed?: number; measured?: string };
+        e2e?: { total?: number } | null;
+      };
+      if (typeof metrics.unit?.total === 'number') {
+        const failed = metrics.unit.failed ?? 0;
+        const coverage = metrics.unit.coverage == null
+          ? ' · coverage not measured'
+          : ` · ${metrics.unit.coverage} %`;
+        this.unitFailed.set(failed);
+        this.unitMetrics.set(`unit ${metrics.unit.total} tests${failed ? ` · ${failed} failed` : coverage}`);
+        if (metrics.unit.measured) {
+          this.unitTip.set(`Measured ${metrics.unit.measured}. Run npm run metrics to measure again`);
+        }
+      }
+      if (typeof metrics.e2e?.total === 'number') {
+        this.e2eMetrics.set(`e2e ${metrics.e2e.total} journeys`);
+      }
+    } catch {
+      // No metrics file: the footer keeps "not measured".
+    }
+  }
 
   /** Row where a disc would land in the currently hovered column (-1 = no preview). */
   protected readonly previewRow = computed(() => {

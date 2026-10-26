@@ -1,6 +1,6 @@
 <main class="game-shell">
   <header class="game-header">
-    <h1>Four Wins</h1>
+    <h1><img class="app-icon" src="four-wins.svg" alt="" />Four Wins</h1>
     <p class="subtitle">
       Connect four discs in a row &mdash; horizontally, vertically or diagonally &mdash; or close a
       2&times;2 block.
@@ -10,14 +10,14 @@
       <button
         type="button"
         [class.active]="store.mode() === 'pvp'"
-        (click)="store.selectMode('pvp')"
+        (click)="setMode('pvp')"
       >
         1 VS 1
       </button>
       <button
         type="button"
         [class.active]="store.mode() === 'ai'"
-        (click)="store.selectMode('ai')"
+        (click)="setMode('ai')"
       >
         VS AI
       </button>
@@ -101,7 +101,30 @@
     <button type="button" class="restart" (click)="store.reset()">New game</button>
   </div>
 
-  <footer class="game-footer">
-    <span>Angular {{ angularVersion }} &middot; Signals &middot; NgRx Signal Store</span>
+  <footer class="site-footer">
+    <div class="footer-items">
+      <button class="footer-item" type="button" title="Read the documentation" (click)="openDocs()">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2H19v20H7.5A2.5 2.5 0 0 1 5 19.5v-15Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 7.5h6M9 11.5h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>README</span>
+      </button>
+      <span class="footer-sep" aria-hidden="true">|</span>
+      <span class="footer-item">
+        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="m9 7.5-4.5 4.5L9 16.5M15 7.5l4.5 4.5L15 16.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>source: <a href="https://github.com/suadin/four-wins" target="_blank" rel="noopener noreferrer">suadin/four-wins</a></span>
+      </span>
+      <span class="footer-sep" aria-hidden="true">|</span>
+      <span class="footer-item" [class.failed]="unitFailed() > 0" [title]="unitTip()">{{ unitMetrics() }}</span>
+      <span class="footer-sep" aria-hidden="true">|</span>
+      <span class="footer-item" title="The game has no browser test suite yet">{{ e2eMetrics() }}</span>
+    </div>
   </footer>
 </main>
+
+@if (showDocs()) {
+  <app-docs
+    [docSlug]="docsSlug()"
+    [sectionSlug]="docsSection()"
+    (navigate)="navigate($event)"
+    (closed)="closeDocs()"
+  />
+}

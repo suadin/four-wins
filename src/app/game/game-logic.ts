@@ -1,4 +1,5 @@
-import { Board, Cell, CellPosition, COLS, Player, ROWS, Win } from './game.types';
+import { COLS, ROWS } from './game.types';
+import type { Board, Cell, CellPosition, Player, Win } from './game.types';
 
 /** Search depth for the minimax AI. 6 gives a strong opponent with <150 ms response time. */
 export const AI_DEPTH = 6;

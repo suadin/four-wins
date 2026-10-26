@@ -1,0 +1,45 @@
+<section class="reader" aria-label="Documentation">
+  <div class="reader-head">
+    <div>
+      <p class="eyebrow">Documentation</p>
+      <h2>{{ currentDoc()?.title ?? 'Documentation' }}</h2>
+    </div>
+    <button class="button" type="button" (click)="closed.emit()">Back to the game</button>
+  </div>
+
+  <div class="reader-tabs" role="tablist" aria-label="Documents">
+    @for (doc of docs(); track doc.slug) {
+      <button
+        class="reader-tab"
+        type="button"
+        role="tab"
+        [class.active]="doc.slug === currentDoc()?.slug"
+        [attr.aria-selected]="doc.slug === currentDoc()?.slug"
+        (click)="openDoc(doc.slug)"
+      >
+        {{ doc.title }}
+      </button>
+    }
+  </div>
+
+  @if (currentDoc(); as doc) {
+    @if (doc.pages.length > 1) {
+      <nav class="reader-sections" aria-label="Sections">
+        @for (page of doc.pages; track page.slug) {
+          <button
+            class="reader-section"
+            type="button"
+            [class.active]="page.slug === currentPage()?.slug"
+            (click)="openSection(page.slug)"
+          >
+            {{ page.title }}
+          </button>
+        }
+      </nav>
+      <h3 class="reader-section-title">{{ currentPage()?.title }}</h3>
+    }
+    <article class="reader-body" [innerHTML]="html()" (click)="onBodyClick($event)"></article>
+  } @else if (error()) {
+    <p class="reader-error">{{ error() }}</p>
+  }
+</section>

@@ -1,0 +1,181 @@
+:host {
+  display: block;
+}
+
+.reader {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  overflow: auto;
+  padding: clamp(1rem, 3vw, 2.5rem);
+  background: var(--docs-bg, #0b1220);
+}
+
+.reader-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #7f8b99;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.reader-head h2 {
+  margin: 0.15rem 0 0;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  background: linear-gradient(90deg, #e63946, #ffd60a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.button {
+  border: 1px solid rgba(154, 165, 177, 0.35);
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  background: transparent;
+  color: #e4eaf1;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover {
+  border-color: #ffd60a;
+  color: #ffd60a;
+}
+
+.reader-tabs,
+.reader-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 56rem;
+  margin: 1rem auto 0.8rem;
+}
+
+.reader-tab,
+.reader-section {
+  border: 1px solid rgba(154, 165, 177, 0.35);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  background: transparent;
+  color: #9aa5b1;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.reader-tab.active,
+.reader-section.active {
+  border-color: #ffd60a;
+  background: rgba(255, 214, 10, 0.12);
+  color: #ffd60a;
+}
+
+.reader-tab:hover,
+.reader-section:hover {
+  color: #e4eaf1;
+}
+
+.reader-section-title {
+  max-width: 56rem;
+  margin: 1.2rem auto 0.5rem;
+  color: #9aa5b1;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.reader-body {
+  max-width: 56rem;
+  margin: 0 auto 2rem;
+  padding: clamp(1rem, 3vw, 1.8rem);
+  border: 1px solid rgba(154, 165, 177, 0.25);
+  border-radius: 12px;
+  background: rgba(20, 30, 48, 0.75);
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.reader-error {
+  max-width: 56rem;
+  margin: 1rem auto;
+  color: #ffd60a;
+}
+
+.reader-body h4 {
+  margin: 1.3rem 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.reader-body h4:first-child {
+  margin-top: 0;
+}
+
+.reader-body p {
+  margin: 0.6rem 0;
+}
+
+.reader-body ul,
+.reader-body ol {
+  padding-left: 1.3rem;
+}
+
+.reader-body li {
+  margin: 0.2rem 0;
+}
+
+.reader-body code {
+  padding: 0.08rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(154, 165, 177, 0.18);
+  font-size: 0.88em;
+}
+
+.reader-body pre {
+  overflow: auto;
+  padding: 0.8rem;
+  border: 1px solid rgba(154, 165, 177, 0.25);
+  border-radius: 8px;
+  background: #070c15;
+}
+
+.reader-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.reader-body a {
+  color: #ffd60a;
+}
+
+.reader-body table {
+  width: 100%;
+  margin: 0.8rem 0;
+  border-collapse: collapse;
+  font-size: 0.88em;
+}
+
+.reader-body th,
+.reader-body td {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid rgba(154, 165, 177, 0.25);
+  text-align: left;
+  vertical-align: top;
+}
+
+.reader-body blockquote {
+  margin: 0.8rem 0;
+  padding-left: 0.9rem;
+  border-left: 3px solid rgba(154, 165, 177, 0.35);
+  color: #9aa5b1;
+}

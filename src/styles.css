@@ -14,3 +14,65 @@ body {
   color: #e4eaf1;
   min-height: 100vh;
 }
+
+/* Footer and app mark, shared by the game shell. */
+.app-icon {
+  width: 1em;
+  height: 1em;
+  border-radius: 0.2em;
+}
+
+.site-footer {
+  width: 100%;
+  margin-top: 0.4rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(154, 165, 177, 0.2);
+  color: #7f8b99;
+  font-size: 0.76rem;
+}
+
+.footer-items {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem 0.55rem;
+  text-align: center;
+}
+
+.footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #7f8b99;
+  font: inherit;
+  font-weight: 600;
+}
+
+button.footer-item {
+  cursor: pointer;
+}
+
+button.footer-item:hover {
+  color: #ffd60a;
+}
+
+.footer-item.failed {
+  color: #e63946;
+}
+
+.footer-item a {
+  color: #ffd60a;
+  text-decoration: none;
+}
+
+.footer-item a:hover {
+  text-decoration: underline;
+}
+
+.footer-sep {
+  opacity: 0.55;
+}
