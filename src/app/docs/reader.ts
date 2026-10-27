@@ -19,21 +19,21 @@ export interface DocSource {
   slug: string;
   title: string;
   file: string;
+  changelog?: string;
   continuous?: boolean;
   raw?: boolean;
 }
 
-/** The reader's document set. README is the only footer item; the rest are tabs. */
+/** The reader's document set. README, SPECS and BASIC SPECS are the footer items. */
 export const DOC_SOURCES: readonly DocSource[] = [
   { slug: 'readme', title: 'README', file: 'README.md' },
-  { slug: 'app-specs', title: 'SPECS', file: 'docs/APP-SPECS.md' },
-  { slug: 'basic-specs', title: 'SPECS Basic', file: 'docs/BASIC-SPECS.md' },
   {
-    slug: 'release-notes',
-    title: 'RELEASE NOTES',
-    file: 'docs/RELEASE-NOTES.md',
-    continuous: true,
+    slug: 'app-specs',
+    title: 'SPECS',
+    file: 'docs/APP-SPECS.md',
+    changelog: 'docs/RELEASE-NOTES.md',
   },
+  { slug: 'basic-specs', title: 'BASIC SPECS', file: 'docs/BASIC-SPECS.md' },
   { slug: 'api', title: 'API', file: 'docs/openapi.yaml', raw: true, continuous: true },
 ];
 
@@ -42,6 +42,17 @@ export const DOC_SLUGS: readonly string[] = DOC_SOURCES.map((source) => source.s
 const BASE_TO_SLUG = new Map(
   DOC_SOURCES.map((source) => [source.file.split('/').pop()?.toLowerCase() ?? '', source.slug]),
 );
+BASE_TO_SLUG.set('release-notes.md', 'app-specs');
+
+/** Builds SPECS with one continuous Changelog page before the app rules. */
+export function composeSpecs(appSpecs: string, releaseNotes: string): string {
+  const notes = releaseNotes
+    .replace(/^#\s+.*$/m, '')
+    .replace(/^##\s+/gm, '### ')
+    .trim();
+  const rules = appSpecs.replace(/^#\s+.*$/m, '').trim();
+  return `# SPECS\n\n## Changelog\n\n${notes}\n\n${rules}\n`;
+}
 
 export type Route =
   { view: 'play'; mode: 'pvp' | 'ai' } | { view: 'docs'; doc: string; section: string | null };

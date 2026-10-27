@@ -1,21 +1,21 @@
 {
   "unit": {
-    "tests": 29,
+    "tests": 33,
     "failures": 0,
-    "coverage": 95.63,
-    "measuredAt": "2026-10-27T20:31",
-    "durationSeconds": 0.277,
-    "perTest": 0.0096
+    "coverage": 95.45,
+    "measuredAt": "2026-10-27T22:20",
+    "durationSeconds": 0.293,
+    "perTest": 0.0089
   },
   "e2e": {
-    "tests": 24,
+    "tests": 28,
     "failures": 0,
-    "coverage": 78.09,
-    "coveredLines": 1494,
-    "totalLines": 1913,
-    "measuredAt": "2026-10-27T20:31",
-    "durationSeconds": 16.978,
-    "perTest": 0.7074
+    "coverage": 79.24,
+    "coveredLines": 1646,
+    "totalLines": 2077,
+    "measuredAt": "2026-10-27T22:20",
+    "durationSeconds": 20.062,
+    "perTest": 0.7165
   },
   "requirements": {
     "app-specs": {
@@ -49,7 +49,7 @@
         "[BASIC-READER-02] a heading becomes a slug",
         "[BASIC-READER-02] a document is split at level-two headings",
         "[BASIC-READER-02] repeated headings get their own slug",
-        "[BASIC-READER-02] release notes stay one continuous page",
+        "[BASIC-READER-05] SPECS starts with one Changelog page",
         "[BASIC-READER-03] sections pick an icon and fall back to a dot",
         "[BASIC-READER-03] section icons are unique within one document",
         "[BASIC-READER-04] html is escaped before markup is added",
@@ -61,14 +61,18 @@
         "[BASIC-FOOTER-02] metric labels show count and coverage",
         "[BASIC-FOOTER-03] measurement tooltips have three rows",
         "[BASIC-FOOTER-03] a missing run is not executed",
-        "[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm"
+        "[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm",
+        "[BASIC-VERSION-01] the app version opens SPECS with a tooltip",
+        "[BASIC-VERSION-02] the Basic Specs version carries its version",
+        "[BASIC-VERSION-03] only major updates are outdated",
+        "[BASIC-VERSION-04] an unknown latest stays neutral"
       ],
       "e2e": [
-        "[BASIC-FOOTER-01] footer shows README, source, unit and E2E icons",
+        "[BASIC-FOOTER-01] footer shows six items in order",
         "[BASIC-FOOTER-02] footer shows counts and coverage",
         "[BASIC-FOOTER-03] test tooltip has three rows",
         "[BASIC-READER-01] reader lists every document",
-        "[BASIC-READER-02] release notes stay one page",
+        "[BASIC-READER-05] SPECS starts with one Changelog page",
         "[BASIC-READER-03] sections are icons with tooltips",
         "[BASIC-READER-04] a relative markdown link opens the reader",
         "[BASIC-LINKS-01] a reload restores the docs section",
@@ -80,7 +84,11 @@
         "[BASIC-DESIGN-02] focus uses the green outline",
         "[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm",
         "[BASIC-FOOTER-04] the footer is fixed and wraps cleanly",
-        "[BASIC-DESIGN-04] the root stays at 100%"
+        "[BASIC-DESIGN-04] the root stays at 100%",
+        "[BASIC-VERSION-01] the app version opens SPECS and never turns red",
+        "[BASIC-VERSION-02] the Basic Specs version opens BASIC SPECS",
+        "[BASIC-VERSION-03] only a major update turns red",
+        "[BASIC-VERSION-04] an unavailable latest version stays neutral"
       ]
     }
   }

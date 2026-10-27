@@ -43,6 +43,7 @@ const unit = spawnSync(
     'test/game-logic.test.ts',
     'test/reader.test.ts',
     'test/metrics.test.ts',
+    'test/version.test.ts',
   ],
   { cwd: root, encoding: 'utf8' },
 );
@@ -107,7 +108,11 @@ const requirements = {
     e2e: titles('e2e/game.spec.ts'),
   },
   'basic-specs': {
-    unit: [...titles('test/reader.test.ts'), ...titles('test/metrics.test.ts')],
+    unit: [
+      ...titles('test/reader.test.ts'),
+      ...titles('test/metrics.test.ts'),
+      ...titles('test/version.test.ts'),
+    ],
     e2e: titles('e2e/site.spec.ts'),
   },
 };

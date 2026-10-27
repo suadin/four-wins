@@ -12,6 +12,7 @@ import { getAvailableRow } from './game/game-logic';
 import { GameStore } from './game/game.store';
 import { COLS, GameMode, Player, PowerState, ROWS } from './game/game.types';
 import { metricView, MetricsFile } from './metrics';
+import { LATEST_URL, RuntimeVersion, versionView } from './version';
 import { TooltipDirective } from './ui/tooltip.directive';
 
 type PowerView = 'available' | 'armed' | 'spent';
@@ -36,6 +37,11 @@ export class AppComponent implements OnDestroy {
     return route.view === 'docs' ? route.section : null;
   });
   protected readonly metrics = signal<MetricsFile>({});
+  protected readonly runtimeVersion = signal<RuntimeVersion | null>(null);
+  protected readonly latestStandard = signal<string | null>(null);
+  protected readonly version = computed(() =>
+    versionView(this.runtimeVersion(), this.latestStandard()),
+  );
   protected readonly unitView = computed(() => metricView('Unit', this.metrics().unit));
   protected readonly e2eView = computed(() => metricView('E2E', this.metrics().e2e));
   protected readonly requirements = computed(() => this.metrics().requirements ?? {});
@@ -51,6 +57,7 @@ export class AppComponent implements OnDestroy {
     window.addEventListener('hashchange', this.onHashChange);
     this.applyRoute();
     this.loadMetrics();
+    this.loadVersions();
   }
 
   ngOnDestroy(): void {
@@ -70,6 +77,14 @@ export class AppComponent implements OnDestroy {
 
   protected openDocs(): void {
     this.navigate(docsHash('readme'));
+  }
+
+  protected openSpecs(): void {
+    this.navigate(docsHash('app-specs'));
+  }
+
+  protected openBasicSpecs(): void {
+    this.navigate(docsHash('basic-specs'));
   }
 
   protected closeDocs(): void {
@@ -107,6 +122,33 @@ export class AppComponent implements OnDestroy {
       this.metrics.set((await response.json()) as MetricsFile);
     } catch {
       // No metrics file: the footer keeps "not executed".
+    }
+  }
+
+  private async loadVersions(): Promise<void> {
+    try {
+      const response = await fetch('basic-specs.json', { cache: 'no-store' });
+      if (response.ok) {
+        this.runtimeVersion.set((await response.json()) as RuntimeVersion);
+      }
+    } catch {
+      // The footer keeps the neutral placeholder.
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3000);
+    try {
+      const response = await fetch(LATEST_URL, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      if (response.ok) {
+        const latest = (await response.json()) as { version?: string };
+        this.latestStandard.set(latest.version ?? null);
+      }
+    } catch {
+      // The Basic Specs item stays neutral and says latest not checked.
+    } finally {
+      clearTimeout(timer);
     }
   }
 

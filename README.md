@@ -33,20 +33,21 @@ disc when the position pays off.
 
 ## Documentation and links
 
-The footer carries four items: **README**, **source**, **unit**, and **E2E**, with one icon
-each. Only README opens the reader; source opens
-[github.com/suadin/four-wins](https://github.com/suadin/four-wins). Unit and E2E show their
-test count and line coverage separately. A missing run is red and says `not executed`; a run
-without coverage says `coverage not measured`. Test tooltips are the wide variant and
-have three rows: measured date and time, duration, and time per test. A missing run's
-tooltip is the single word `not executed`.
+The footer carries six items in order: **README**, **SPECS**, **BASIC SPECS**, **source**,
+**unit**, and **E2E**. README opens the README, SPECS opens the app version and SPECS, BASIC
+SPECS opens the pinned standard, source opens
+[github.com/suadin/four-wins](https://github.com/suadin/four-wins). The app version never
+turns stale. The Basic Specs version turns red only for a newer major release; minor and
+patch updates are named in its tooltip. Unit and E2E show their test count and line coverage
+separately. A missing run is red and says `not executed`; a run without coverage says
+`coverage not measured`.
 
 The reader opens in the main panel and leaves header and footer visible. It lists **README**,
-**SPECS**, **SPECS Basic**, **RELEASE NOTES**, and **API** as tabs; only README has a footer
-item. Every document is split at level-two headings, except RELEASE NOTES and API, which stay
-one continuous page (release notes newest first). Sections are line icons, not text chips;
-each icon has its own symbol, the tooltip gives the heading, and the active icon is yellow and
-rotated by `-2deg`. Relative Markdown links between documents open in the reader.
+**SPECS**, **BASIC SPECS**, and **API** as tabs; SPECS begins with a one-page **Changelog**
+from `RELEASE-NOTES.md`, followed by the app rules. Every document is split at level-two
+headings, except API, which stays one continuous page. Sections are line icons, not text
+chips; each icon has its own symbol, the tooltip gives the heading, and the active icon is
+yellow and rotated by `-2deg`. Relative Markdown links between documents open in the reader.
 
 Addresses are stable:
 
@@ -88,8 +89,8 @@ pnpm build:pages    # production build with the /four-wins/ base href
 ## Tests and metrics
 
 ```bash
-pnpm test           # 29 unit tests, with line coverage
-pnpm test:e2e       # 24 Playwright tests in e2e/
+pnpm test           # 33 unit tests, with line coverage
+pnpm test:e2e       # 28 Playwright tests in e2e/
 pnpm metrics        # run both, write public/test-metrics.json
 pnpm check          # metrics, production build, documentation drift check
 ```
@@ -103,7 +104,7 @@ The page is static, so it cannot start a test run itself. `pnpm metrics` is the 
 the footer reads the last `public/test-metrics.json`. Commit that file after a change so the
 deployed page shows the current numbers.
 
-The unit suite covers the engine, the reader helpers, and the metric formatting. The E2E suite
+The unit suite covers the engine, the reader helpers, the metric formatting, and the version state. The E2E suite
 covers the game moves, the dark disc, the mode switch, the footer, the reader, deep links,
 layout, colour scheme, focus, and dates. Every test names the rule it protects with a bracket
 tag; both SPECS pages list the concrete names.

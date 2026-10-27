@@ -1,5 +1,12 @@
 # Release notes
 
+## 2026-10-27 — Basic Specs 1.1.0
+
+- Six footer items: README, SPECS, BASIC SPECS, source, unit and E2E.
+- App version and Basic Specs version open their documentation.
+- Only a newer Basic Specs major turns the version red; minor and patch are tooltip-only.
+- SPECS starts with one Changelog page; the separate release notes tab is gone.
+
 ## 2026-10-27 — Basic Specs 1.0.2
 
 - Pinned the public Basic Specs standard in `basics.json`, `basics.lock` and `basics/`.

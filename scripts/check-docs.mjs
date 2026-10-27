@@ -82,6 +82,7 @@ for (const file of [
   'test/game-logic.test.ts',
   'test/reader.test.ts',
   'test/metrics.test.ts',
+  'test/version.test.ts',
   'e2e/game.spec.ts',
   'e2e/site.spec.ts',
 ]) {

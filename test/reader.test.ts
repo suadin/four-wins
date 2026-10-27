@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
+  composeSpecs,
   docSlugForFile,
   docsHash,
   escapeHtml,
@@ -44,17 +45,16 @@ test('[BASIC-READER-02] repeated headings get their own slug', () => {
   );
 });
 
-test('[BASIC-READER-02] release notes stay one continuous page', () => {
-  const doc = splitDocument(
-    'release-notes',
-    'RELEASE NOTES',
+test('[BASIC-READER-05] SPECS starts with one Changelog page', () => {
+  const markdown = composeSpecs(
+    '# App specs\n\n## Board\n\nRules.\n',
     '# Release notes\n\n## 2026-10-27\n\nNew.\n\n## 2026-10-26\n\nOld.\n',
-    true,
   );
-  assert.equal(doc.pages.length, 1);
-  assert.equal(doc.pages[0].slug, 'all');
-  assert.equal(doc.pages[0].markdown.includes('## 2026-10-27'), true);
-  assert.equal(doc.pages[0].markdown.startsWith('# '), false);
+  const doc = splitDocument('app-specs', 'SPECS', markdown);
+  assert.equal(doc.pages[0].slug, 'changelog');
+  assert.equal(doc.pages[0].title, 'Changelog');
+  assert.match(doc.pages[0].markdown, /### 2026-10-27/);
+  assert.equal(doc.pages[1].title, 'Board');
 });
 
 test('[BASIC-READER-03] sections pick an icon and fall back to a dot', () => {
@@ -104,6 +104,7 @@ test('[BASIC-READER-04] markdown renders lists, tables and code', () => {
 test('[BASIC-READER-04] relative markdown links map to reader documents', () => {
   assert.equal(docSlugForFile('docs/APP-SPECS.md'), 'app-specs');
   assert.equal(docSlugForFile('BASIC-SPECS.md'), 'basic-specs');
+  assert.equal(docSlugForFile('RELEASE-NOTES.md'), 'app-specs');
   assert.equal(docSlugForFile('openapi.yaml'), 'api');
   assert.equal(docSlugForFile('notes.txt'), null);
   const html = renderMarkdown('[SPECS](docs/APP-SPECS.md#board-and-rules)');

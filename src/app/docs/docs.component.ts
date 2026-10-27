@@ -7,6 +7,7 @@ import {
   docsHash,
   iconsFor,
   renderMarkdown,
+  composeSpecs,
   splitDocument,
 } from './reader';
 import { RequirementSet } from '../metrics';
@@ -155,9 +156,16 @@ export class DocsComponent {
           continue;
         }
         const text = await response.text();
-        const markdown = source.raw
-          ? `# ${source.title}\n\n## OpenAPI definition\n\n\`\`\`yaml\n${text}\n\`\`\``
-          : text;
+        let markdown = text;
+        if (source.changelog) {
+          const notes = await fetch(source.changelog, { cache: 'no-store' });
+          if (notes.ok) {
+            markdown = composeSpecs(text, await notes.text());
+          }
+        }
+        if (source.raw) {
+          markdown = `# ${source.title}\n\n## OpenAPI definition\n\n\`\`\`yaml\n${markdown}\n\`\`\``;
+        }
         docs.push(splitDocument(source.slug, source.title, markdown, source.continuous));
       } catch {
         // A missing document is not fatal: the other tabs still work.

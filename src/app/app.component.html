@@ -140,6 +140,47 @@
       <span>README</span>
     </button>
     <span class="footer-sep" aria-hidden="true">|</span>
+    <button
+      class="footer-item"
+      type="button"
+      [attr.data-tip]="version().appTip"
+      [attr.aria-label]="version().appTip"
+      appTooltip
+      (click)="openSpecs()"
+    >
+      <img class="footer-logo" src="four-wins.svg" alt="" />
+      <span>{{ version().appLabel }}</span>
+    </button>
+    <span class="footer-sep" aria-hidden="true">|</span>
+    <button
+      class="footer-item"
+      type="button"
+      [class.outdated]="version().outdated"
+      [attr.data-tip]="version().basicTip"
+      [attr.aria-label]="version().basicTip"
+      appTooltip
+      (click)="openBasicSpecs()"
+    >
+      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+        <path
+          d="m12 3 8 4-8 4-8-4 8-4Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linejoin="round"
+        />
+        <path
+          d="m4 11 8 4 8-4M4 15l8 4 8-4"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span>{{ version().basicLabel }}</span>
+    </button>
+    <span class="footer-sep" aria-hidden="true">|</span>
     <span class="footer-item">
       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
         <path

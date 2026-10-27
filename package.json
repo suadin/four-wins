@@ -1,13 +1,13 @@
 {
   "name": "four-wins",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "build:pages": "ng build --configuration production --base-href /four-wins/",
     "watch": "ng build --watch --configuration development",
-    "test": "node --experimental-strip-types --import ./test/register.mjs --test --experimental-test-coverage --test-coverage-include='src/app/**/*.ts' test/game-logic.test.ts test/reader.test.ts test/metrics.test.ts",
+    "test": "node --experimental-strip-types --import ./test/register.mjs --test --experimental-test-coverage --test-coverage-include='src/app/**/*.ts' test/game-logic.test.ts test/reader.test.ts test/metrics.test.ts test/version.test.ts",
     "test:e2e": "playwright test",
     "metrics": "node scripts/metrics.mjs",
     "check:docs": "node scripts/check-docs.mjs",

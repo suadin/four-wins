@@ -1,10 +1,9 @@
 # App specs — Four Wins
 
-These rules are specific to Four Wins. The reusable base is in
-[BASIC SPECS](BASIC-SPECS.md). The shared [Basic Specs](https://github.com/suadin/basic-specs) are the source for both;
-[README](../README.md) explains setup, operation, and deployment.
-
 ## Board and rules
+
+These rules are specific to Four Wins and extend [BASIC SPECS](BASIC-SPECS.md).
+[README](../README.md) explains setup, operation, and deployment.
 
 - The board has six rows and seven columns. It starts empty.
 - Red starts. Players alternate, and the mode decides whether the second player is a
@@ -41,10 +40,10 @@ These rules are specific to Four Wins. The reusable base is in
 
 ## Documentation and address
 
-- The footer opens the reader. README, SPECS, SPECS Basic, RELEASE NOTES, and API are
-  tabs; only README is a footer item.
-- Each document is split at level-two headings, except RELEASE NOTES and API, which
-  stay one continuous page. RELEASE NOTES is newest first.
+- The footer opens the reader. README, SPECS, BASIC SPECS, and API are tabs; README,
+  the app version and the Basic Specs version are the footer items.
+- SPECS begins with the one-page Changelog from `RELEASE-NOTES.md`, followed by the app
+  rules. API stays one continuous page.
 - Sections are a row of line icons. Each icon has its own symbol, its tooltip gives
   the heading, and the active icon is yellow and rotated by `-2deg`.
 - Relative Markdown links between documents open in the reader.

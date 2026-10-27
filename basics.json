@@ -1,6 +1,6 @@
 {
   "name": "four-wins",
-  "standard": "1.0.2",
+  "standard": "1.1.0",
   "profiles": [
     "web-static"
   ],
@@ -14,5 +14,7 @@
     "metrics": "pnpm metrics",
     "docs": "pnpm build:pages && pnpm check:docs"
   },
-  "releaseNotes": "docs/RELEASE-NOTES.md"
+  "releaseNotes": "docs/RELEASE-NOTES.md",
+  "appVersion": "1.0.0",
+  "runtime": "public/basic-specs.json"
 }
