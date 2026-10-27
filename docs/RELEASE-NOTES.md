@@ -1,5 +1,11 @@
 # Release notes
 
+## 2026-10-27 — Basic Specs 1.0.0
+
+- Pinned the public Basic Specs standard in `basics.json`, `basics.lock` and `basics/`.
+- The generated `BASIC-SPECS.md` is checked against the standard and against the
+  tests. The suite now has 24 E2E journeys.
+
 ## 2026-10-27 — Contract pass
 
 - Reader lists README, SPECS, SPECS Basic, RELEASE NOTES, and API; the reader now
