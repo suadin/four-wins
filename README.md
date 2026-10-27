@@ -1,6 +1,6 @@
 ﻿# Four Wins (Connect Four)
 
-## ▶ Play the game
+## Play the game
 
 **Live version:** **https://suadin.github.io/four-wins/**
 
@@ -10,10 +10,10 @@ via GitHub Actions → GitHub Pages.
 
 ## Game modes
 
-| Mode      | Description                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------- |
-| **1 VS 1** | Two players on the same device. Red starts; players alternate by clicking a column.             |
-| **VS AI**  | You play **red** against a minimax AI (alpha-beta pruning, depth 6) playing **yellow**.          |
+| Mode       | Description                                                                             |
+| ---------- | --------------------------------------------------------------------------------------- |
+| **1 VS 1** | Two players on the same device. Red starts; players alternate by clicking a column.     |
+| **VS AI**  | You play **red** against a minimax AI (alpha-beta pruning, depth 6) playing **yellow**. |
 
 **Rules:** The first player to connect **four discs** in a row — horizontally, vertically or
 diagonally — wins. Winning discs are highlighted. Click **New game** to restart
@@ -33,20 +33,29 @@ disc when the position pays off.
 
 ## Documentation and links
 
-- The footer opens this README and the OpenAPI document inside the page, one page per
-  level-two heading, with a row of line icons for the sections. `#/docs/readme` and `#/docs/api` are stable addresses; a reload restores
-  the same document and section.
-- The game mode is part of the address: `#/play/pvp` and `#/play/ai`. Opening one starts a
-  fresh game in that mode, so a shared link lands in the right mode.
-- The footer also carries the source repository and the last unit-test measurement. A missing
-  measurement reads “not measured”, never zero.
+The footer carries four items: **README**, **source**, **unit**, and **E2E**, with one icon
+each. Only README opens the reader; source opens
+[github.com/suadin/four-wins](https://github.com/suadin/four-wins). Unit and E2E show their
+test count and line coverage separately. A missing run is red and says `not executed`; a run
+without coverage says `coverage not measured`. Test tooltips are the wide variant and
+have three rows: measured date and time, duration, and time per test. A missing run's
+tooltip is the single word `not executed`.
 
-The interface follows the workspace contract where it applies: README and source in one
-centred footer, deep links, quiet colours, one name for one thing. Three rules do not apply to
-a single-board game: there is no list to page, no calendar, and no E2E suite yet. The static
-page cannot start a test run itself, so the unit number is the last measurement written by
-`npm run metrics`. Coverage is not measured yet, and the board of a running game is not in the
-address — only the mode and the documentation are.
+The reader opens in the main panel and leaves header and footer visible. It lists **README**,
+**SPECS**, **SPECS Basic**, **RELEASE NOTES**, and **API** as tabs; only README has a footer
+item. Every document is split at level-two headings, except RELEASE NOTES and API, which stay
+one continuous page (release notes newest first). Sections are line icons, not text chips;
+each icon has its own symbol, the tooltip gives the heading, and the active icon is yellow and
+rotated by `-2deg`. Relative Markdown links between documents open in the reader.
+
+Addresses are stable:
+
+- `#/play/pvp` and `#/play/ai` select the mode; opening one starts a fresh game.
+- `#/docs/readme/tests-and-metrics` restores the document and section after a reload.
+- An unknown address returns to the start.
+
+The board of a running game is **not** part of the address. That is the only unlinkable
+state; the mode and the documentation are linkable.
 
 ## Tech stack
 
@@ -56,65 +65,109 @@ address — only the mode and the documentation are.
 - Pure, side-effect-free TypeScript game engine (`src/app/game/game-logic.ts`)
 - AI: alpha-beta minimax with heuristic board evaluation (center preference, window scoring),
   plus a heuristic decision on when to arm and when to spend its own dark power disc
-- CI/CD: GitHub Actions workflow deploying to GitHub Pages (`.github/workflows/deploy.yml`)
+- Playwright for the browser suite; Node's test runner for the unit suite
+- CI/CD: GitHub Actions runs the tests before building and deploying to GitHub Pages
+  (`.github/workflows/deploy.yml`)
 
 ## Run locally
 
+The project uses pnpm (`packageManager` in `package.json`):
+
 ```bash
-npm install
-npm start          # ng serve → http://localhost:4200
+pnpm install
+pnpm start          # ng serve → http://localhost:4200
 ```
 
 Production build:
 
 ```bash
-npm run build      # output: dist/four-wins/browser
+pnpm build          # output: dist/four-wins/browser
+pnpm build:pages    # production build with the /four-wins/ base href
 ```
 
 ## Tests and metrics
 
-The engine and the documentation reader have a unit suite that needs no browser and no test
-framework beyond Node's own runner:
-
 ```bash
-npm test           # 21 tests for the engine and the reader
-npm run metrics    # run them again and write public/test-metrics.json
+pnpm test           # 29 unit tests, with line coverage
+pnpm test:e2e       # 22 Playwright tests in e2e/
+pnpm metrics        # run both, write public/test-metrics.json
+pnpm check          # metrics, production build, documentation drift check
 ```
 
-The footer reads `public/test-metrics.json`; commit it after a change so the page shows the
-current count. The runner uses Node's type stripping, so Node 22.6 or newer is required.
-There is no E2E suite and no coverage measurement yet, and the footer says so rather than
-showing zero.
+The unit suite uses Node's own runner and type stripping (Node 22.6 or newer). Its coverage is
+Node's built-in line coverage. The browser suite runs in Chromium through Playwright and
+collects V8 coverage with `page.coverage`; `v8-to-istanbul` maps it back to `src/app` line
+coverage. Both numbers are real measurements, not placeholders.
+
+The page is static, so it cannot start a test run itself. `pnpm metrics` is the named command;
+the footer reads the last `public/test-metrics.json`. Commit that file after a change so the
+deployed page shows the current numbers.
+
+The unit suite covers the engine, the reader helpers, and the metric formatting. The E2E suite
+covers the game moves, the dark disc, the mode switch, the footer, the reader, deep links,
+layout, colour scheme, focus, and dates. Every test names the rule it protects with a bracket
+tag; both SPECS pages list the concrete names.
 
 ## API documentation
 
 An **OpenAPI 3.1** definition describing the game engine's API surface (create game, make a
 move, read state) is maintained in [`docs/openapi.yaml`](docs/openapi.yaml). The app itself is
 client-side only; the spec documents the domain model for reuse in a future backend or
-multiplayer service. The footer’s **API** tab shows the same file without leaving the game.
+multiplayer service. The reader's **API** tab shows the same file without leaving the game.
+
+## Design
+
+The interface follows the workspace contract and uses the diary tokens: paper, card, ink,
+muted, hard ink shadows, dashed ink lines, Comic Sans, and the OS light/dark scheme. Yellow
+marks selection, red warns, green marks good and links, purple marks the special dark-disc
+action. The two players keep red and yellow discs because those are the game's content, not UI
+status colours. Browser zoom scales the layout; header and footer stay visible while the main
+panel scrolls.
 
 ## Project structure
 
 ```
 src/app/
-├── app.component.*        # Board UI, mode switch, status display, footer
+├── app.component.*        # Header, board UI, mode switch, status, footer
 ├── app.config.ts          # Zoneless change detection
+├── metrics.ts             # Footer labels and three-row tooltips
 ├── docs/
-│   ├── docs.component.*   # In-page README and API reader, icon sections
-│   └── reader.ts          # Markdown pages, icons, routes, renderer
-└── game/
-    ├── game.types.ts      # Board, Player, GameMode, GameStatus types
-    ├── game-logic.ts      # Pure engine: drop, win detection, minimax AI
-    └── game.store.ts      # NgRx Signal Store (state, computed, methods)
+│   ├── docs.component.*   # Reader in the main panel
+│   └── reader.ts          # Documents, Markdown pages, icons, routes, renderer
+├── game/
+│   ├── game.types.ts      # Board, Player, GameMode, GameStatus types
+│   ├── game-logic.ts      # Pure engine: drop, win detection, minimax AI
+│   └── game.store.ts      # NgRx Signal Store (state, computed, methods)
+└── ui/
+    └── tooltip.directive.ts
 test/
-├── game-logic.test.ts     # Node test runner checks for the engine
+├── game-logic.test.ts     # Engine checks
 ├── reader.test.ts         # Reader pages, icons, routes, Markdown
+├── metrics.test.ts        # Footer labels, tooltips, dates
 ├── register.mjs           # Loads the TypeScript resolver
 └── ts-resolver.mjs        # Resolves Angular's extensionless imports
+e2e/
+├── fixtures.ts            # Starts and stores V8 coverage per test
+├── game.spec.ts           # Game moves, wins, dark disc, mode, reset
+├── reporter.ts            # Writes e2e-results.json
+└── site.spec.ts           # Footer, reader, links, layout, design, dates
 scripts/
+├── coverage.mjs           # V8 coverage → src/app line coverage
+├── check-docs.mjs         # Documentation drift check
 └── metrics.mjs            # Writes public/test-metrics.json
 docs/
+├── APP-SPECS.md           # Four Wins rules and test names
+├── BASIC-SPECS.md         # Reusable app rules and test names
+├── RELEASE-NOTES.md       # Continuous release history
 └── openapi.yaml           # OpenAPI 3.1 documentation of the game API
 .github/workflows/
-└── deploy.yml             # Auto-deploy to GitHub Pages on push to main
+└── deploy.yml             # Tests, build, deploy to GitHub Pages
 ```
+
+## Contract notes
+
+Four Wins is a single-board game: there is no list, no pager, no calendar, and no private data.
+The board is bounded, so there is nothing to page. The reader's API tab is an extra document,
+not a fifth footer item. The contract says both “not measured” and “not executed”; the Tests
+section is more specific, so a missing run says `not executed`, while a run without coverage
+says `coverage not measured`, never `0`.

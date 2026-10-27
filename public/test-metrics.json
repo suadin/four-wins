@@ -1,9 +1,85 @@
 {
   "unit": {
-    "total": 21,
-    "coverage": null,
-    "failed": 0,
-    "measured": "2026-10-26T14:33"
+    "tests": 29,
+    "failures": 0,
+    "coverage": 95.63,
+    "measuredAt": "2026-10-27T18:40",
+    "durationSeconds": 0.273,
+    "perTest": 0.0094
   },
-  "e2e": null
+  "e2e": {
+    "tests": 22,
+    "failures": 0,
+    "coverage": 77.99,
+    "coveredLines": 1492,
+    "totalLines": 1913,
+    "measuredAt": "2026-10-27T18:41",
+    "durationSeconds": 15.173,
+    "perTest": 0.6897
+  },
+  "requirements": {
+    "app-specs": {
+      "unit": [
+        "[GAME-01] an empty board has the agreed shape",
+        "[GAME-02] the opponent swaps players",
+        "[GAME-03] a disc falls to the lowest free row and the old board stays",
+        "[GAME-04] a full column refuses another disc",
+        "[GAME-05] four discs in a row are a line win",
+        "[GAME-05] four discs in a column are a line win",
+        "[GAME-05] four discs on a diagonal are a line win",
+        "[GAME-06] a filled 2x2 block wins as well",
+        "[GAME-07] a full board is a draw",
+        "[GAME-08] a conversion turns one disc and leaves the rest alone",
+        "[GAME-08] a conversion picks an opposing neighbour",
+        "[GAME-10] the best move takes an immediate win",
+        "[GAME-10] the AI action is a legal column for an empty board"
+      ],
+      "e2e": [
+        "[GAME-03] a disc falls into the clicked column",
+        "[GAME-05] four in a row wins and highlights",
+        "[GAME-06] a 2x2 block wins",
+        "[GAME-08] the dark disc converts a neighbour",
+        "[GAME-09] using the dark disc costs a move",
+        "[GAME-11] the mode switch updates the address",
+        "[GAME-12] new game resets the board"
+      ]
+    },
+    "basic-specs": {
+      "unit": [
+        "[BASIC-READER-02] a heading becomes a slug",
+        "[BASIC-READER-02] a document is split at level-two headings",
+        "[BASIC-READER-02] repeated headings get their own slug",
+        "[BASIC-READER-02] release notes stay one continuous page",
+        "[BASIC-READER-03] sections pick an icon and fall back to a dot",
+        "[BASIC-READER-03] section icons are unique within one document",
+        "[BASIC-READER-04] html is escaped before markup is added",
+        "[BASIC-READER-04] markdown renders lists, tables and code",
+        "[BASIC-READER-04] relative markdown links map to reader documents",
+        "[BASIC-LINKS-01] routes survive a reload",
+        "[BASIC-LINKS-01] address helpers agree with the parser",
+        "[BASIC-LINKS-01] unknown routes return to the start",
+        "[BASIC-FOOTER-02] metric labels show count and coverage",
+        "[BASIC-FOOTER-03] measurement tooltips have three rows",
+        "[BASIC-FOOTER-03] a missing run is not executed",
+        "[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm"
+      ],
+      "e2e": [
+        "[BASIC-FOOTER-01] footer shows README, source, unit and E2E icons",
+        "[BASIC-FOOTER-02] footer shows counts and coverage",
+        "[BASIC-FOOTER-03] test tooltip has three rows",
+        "[BASIC-READER-01] reader lists every document",
+        "[BASIC-READER-02] release notes stay one page",
+        "[BASIC-READER-03] sections are icons with tooltips",
+        "[BASIC-READER-04] a relative markdown link opens the reader",
+        "[BASIC-LINKS-01] a reload restores the docs section",
+        "[BASIC-LINKS-01] an unknown address returns to the start",
+        "[BASIC-LAYOUT-01] header and footer stay visible while the main panel scrolls",
+        "[BASIC-LAYOUT-01] the reader does not cover header or footer",
+        "[BASIC-LAYOUT-02] header is one row with actions on the right",
+        "[BASIC-DESIGN-01] the page follows the OS colour scheme",
+        "[BASIC-DESIGN-02] focus uses the green outline",
+        "[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm"
+      ]
+    }
+  }
 }

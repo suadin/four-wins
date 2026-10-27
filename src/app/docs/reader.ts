@@ -15,20 +15,76 @@ export interface Doc {
   pages: DocPage[];
 }
 
+export interface DocSource {
+  slug: string;
+  title: string;
+  file: string;
+  continuous?: boolean;
+  raw?: boolean;
+}
+
+/** The reader's document set. README is the only footer item; the rest are tabs. */
+export const DOC_SOURCES: readonly DocSource[] = [
+  { slug: 'readme', title: 'README', file: 'README.md' },
+  { slug: 'app-specs', title: 'SPECS', file: 'docs/APP-SPECS.md' },
+  { slug: 'basic-specs', title: 'SPECS Basic', file: 'docs/BASIC-SPECS.md' },
+  {
+    slug: 'release-notes',
+    title: 'RELEASE NOTES',
+    file: 'docs/RELEASE-NOTES.md',
+    continuous: true,
+  },
+  { slug: 'api', title: 'API', file: 'docs/openapi.yaml', raw: true, continuous: true },
+];
+
+export const DOC_SLUGS: readonly string[] = DOC_SOURCES.map((source) => source.slug);
+
+const BASE_TO_SLUG = new Map(
+  DOC_SOURCES.map((source) => [source.file.split('/').pop()?.toLowerCase() ?? '', source.slug]),
+);
+
 export type Route =
-  | { view: 'play'; mode: 'pvp' | 'ai' }
-  | { view: 'docs'; doc: string; section: string | null };
+  { view: 'play'; mode: 'pvp' | 'ai' } | { view: 'docs'; doc: string; section: string | null };
 
 const SLUG = /[^a-z0-9]+/g;
 
 export function slugify(value: string): string {
-  return String(value ?? '')
-    .toLowerCase()
-    .replace(SLUG, '-')
-    .replace(/^-+|-+$/g, '') || 'page';
+  return (
+    String(value ?? '')
+      .toLowerCase()
+      .replace(SLUG, '-')
+      .replace(/^-+|-+$/g, '') || 'page'
+  );
 }
 
-export function splitDocument(slug: string, title: string, markdown: string): Doc {
+export function isDocSlug(slug: string): boolean {
+  return DOC_SLUGS.includes(slug);
+}
+
+/** Maps a link target such as `docs/APP-SPECS.md` or `BASIC-SPECS.md` to a tab. */
+export function docSlugForFile(file: string): string | null {
+  const name =
+    String(file ?? '')
+      .split('/')
+      .pop()
+      ?.toLowerCase() ?? '';
+  return BASE_TO_SLUG.get(name) ?? null;
+}
+
+export function splitDocument(
+  slug: string,
+  title: string,
+  markdown: string,
+  continuous = false,
+): Doc {
+  const text = String(markdown ?? '')
+    .replace(/\r\n/g, '\n')
+    .trim();
+  if (continuous) {
+    const body = text.replace(/^#\s+.*(?:\n|$)/, '').trim();
+    return { slug, title, pages: [{ title, slug: 'all', markdown: body || text }] };
+  }
+
   const pages: DocPage[] = [];
   const used: Record<string, number> = {};
   let currentTitle = 'Overview';
@@ -48,7 +104,7 @@ export function splitDocument(slug: string, title: string, markdown: string): Do
     pages.push({ title: pageTitle, slug: pageSlug, markdown: body });
   };
 
-  for (const line of String(markdown ?? '').split('\n')) {
+  for (const line of text.split('\n')) {
     if (line.startsWith('# ') && pages.length === 0 && !currentLines.join('').trim()) {
       continue;
     }
@@ -82,31 +138,71 @@ export function parseRoute(hash: string): Route {
   return { view: 'play', mode: kind === 'play' && first === 'ai' ? 'ai' : 'pvp' };
 }
 
+/** Parses a hash and replaces unknown documents with the start page. */
+export function resolveRoute(hash: string): Route {
+  const route = parseRoute(hash);
+  if (route.view === 'docs' && !isDocSlug(route.doc)) {
+    return { view: 'docs', doc: 'readme', section: null };
+  }
+  return route;
+}
+
+/** The canonical address for a route, used to rewrite unknown addresses. */
+export function routeHash(route: Route): string {
+  return route.view === 'docs' ? docsHash(route.doc, route.section) : playHash(route.mode);
+}
+
 /**
  * The icon that stands for a section. Sections are navigated by icons, so the
  * mapping is data: the tooltip still gives the full heading.
  */
 const ICON_RULES: ReadonlyArray<readonly [RegExp, string]> = [
-  [/play|start page|spiel/, 'play'],
+  [/play|start page/, 'play'],
   [/install|setup|download/, 'install'],
-  [/game mode|modes/, 'gamepad'],
-  [/tech|stack/, 'layers'],
+  [/game mode|modes|board|rules/, 'gamepad'],
+  [/tech|stack|layout|surface/, 'layers'],
   [/run|local/, 'terminal'],
   [/api/, 'plug'],
   [/project|structure/, 'tree'],
-  [/test/, 'flask'],
-  [/security|sicher/, 'shield'],
-  [/config|setting|einstellung/, 'sliders'],
+  [/e2e|playwright|browser test/, 'browser'],
+  [/test/, 'clipboard'],
+  [/security|data|access/, 'shield'],
+  [/config|setting/, 'sliders'],
   [/why|reason|own machine/, 'home'],
   [/deploy|server|host/, 'server'],
+  [/footer/, 'pages'],
   [/github|pages/, 'pages'],
-  [/how|written|geschrieben/, 'pen'],
-  [/licen[cs]e/, 'scale'],
-  [/feature|does|capab|kann/, 'sparkle'],
+  [/how|written/, 'pen'],
+  [/design|date|licen[cs]e/, 'scale'],
+  [/feature|does|capab|dark/, 'sparkle'],
   [/bookmark|supported|source|woher/, 'bookmark'],
-  [/read|chrome|automatic|sync|fresh|helper/, 'sync'],
+  [/read|chrome|automatic|sync|fresh|helper|link/, 'sync'],
   [/export|import/, 'bookmark'],
-  [/documentation|guide|readme|overview|links/, 'book'],
+  [/documentation|guide|readme|overview|address/, 'book'],
+];
+
+const FALLBACK_ICONS: readonly string[] = [
+  'bookmark',
+  'sparkle',
+  'scale',
+  'shield',
+  'sliders',
+  'sync',
+  'home',
+  'pen',
+  'pages',
+  'server',
+  'tree',
+  'terminal',
+  'layers',
+  'gamepad',
+  'install',
+  'play',
+  'book',
+  'clipboard',
+  'browser',
+  'plug',
+  'dot',
 ];
 
 export function iconFor(title: string): string {
@@ -117,6 +213,19 @@ export function iconFor(title: string): string {
     }
   }
   return 'dot';
+}
+
+/** Assigns a unique icon to every page of one document. */
+export function iconsFor(pages: readonly DocPage[]): string[] {
+  const used = new Set<string>();
+  return pages.map((page) => {
+    let icon = iconFor(page.title);
+    if (used.has(icon)) {
+      icon = FALLBACK_ICONS.find((candidate) => !used.has(candidate)) ?? 'dot';
+    }
+    used.add(icon);
+    return icon;
+  });
 }
 
 export function escapeHtml(value: string): string {
@@ -134,22 +243,34 @@ function inlineMarkdown(text: string): string {
     return `\u0000${codes.length - 1}\u0000`;
   });
   output = output.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-  output = output.replace(/\[([^\]]+)\]\((#[A-Za-z0-9-]+)\)/g,
+  output = output.replace(
+    /\[([^\]]+)\]\((#[A-Za-z0-9-]+)\)/g,
     (_, label: string, anchor: string) =>
-      `<a href="#" data-doc-anchor="${escapeHtml(anchor)}">${label}</a>`);
-  output = output.replace(/\[([^\]]+)\]\(([^)\s]+\.md)(#[A-Za-z0-9-]+)?\)/g,
+      `<a href="#" data-doc-anchor="${escapeHtml(anchor)}">${label}</a>`,
+  );
+  output = output.replace(
+    /\[([^\]]+)\]\(([^)\s]+\.(?:md|ya?ml))(#[A-Za-z0-9-]+)?\)/g,
     (_, label: string, path: string, anchor: string | undefined) => {
       const file = path.split('/').pop() ?? path;
-      return `<a href="#" data-doc-file="${escapeHtml(file)}"`
-        + ` data-doc-anchor="${escapeHtml(anchor ?? '')}">${label}</a>`;
-    });
-  output = output.replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g,
-    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      return (
+        `<a href="#" data-doc-file="${escapeHtml(file)}"` +
+        ` data-doc-anchor="${escapeHtml(anchor ?? '')}">${label}</a>`
+      );
+    },
+  );
+  output = output.replace(
+    /\[([^\]]+)\]\((https?:[^)\s]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
   output = output.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
-  output = output.replace(/&lt;(https?:\/\/[^\s]+?)&gt;/g,
-    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-  return output.replace(/\u0000(\d+)\u0000/g,
-    (_, index: string) => `<code>${codes[Number(index)]}</code>`);
+  output = output.replace(
+    /&lt;(https?:\/\/[^\s]+?)&gt;/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+  );
+  return output.replace(
+    /\u0000(\d+)\u0000/g,
+    (_, index: string) => `<code>${codes[Number(index)]}</code>`,
+  );
 }
 
 export function renderMarkdown(markdown: string): string {
@@ -181,10 +302,17 @@ export function renderMarkdown(markdown: string): string {
     }
     const rows = table
       .filter((row) => !/^\|?[\s:|-]+\|?$/.test(row))
-      .map((row) => row.replace(/^\||\|$/g, '').split('|').map((cell) => cell.trim()));
+      .map((row) =>
+        row
+          .replace(/^\||\|$/g, '')
+          .split('|')
+          .map((cell) => cell.trim()),
+      );
     if (rows.length) {
       const [head, ...body] = rows;
-      html.push(`<table><thead><tr>${head.map((cell) => `<th>${inlineMarkdown(cell)}</th>`).join('')}</tr></thead><tbody>`);
+      html.push(
+        `<table><thead><tr>${head.map((cell) => `<th>${inlineMarkdown(cell)}</th>`).join('')}</tr></thead><tbody>`,
+      );
       for (const row of body) {
         html.push(`<tr>${row.map((cell) => `<td>${inlineMarkdown(cell)}</td>`).join('')}</tr>`);
       }
@@ -226,8 +354,7 @@ export function renderMarkdown(markdown: string): string {
     }
     closeTable();
     if (list && /^\s{2,}\S/.test(line)) {
-      html[listItem] = html[listItem].replace(/<\/li>$/,
-        ` ${inlineMarkdown(line.trim())}</li>`);
+      html[listItem] = html[listItem].replace(/<\/li>$/, ` ${inlineMarkdown(line.trim())}</li>`);
       continue;
     }
     const heading = /^#{1,6}\s+(.*)$/.exec(line);

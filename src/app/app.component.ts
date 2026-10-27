@@ -7,16 +7,18 @@ import {
   signal,
 } from '@angular/core';
 import { DocsComponent } from './docs/docs.component';
-import { docsHash, parseRoute, playHash } from './docs/reader';
+import { docsHash, parseRoute, playHash, resolveRoute, routeHash } from './docs/reader';
 import { getAvailableRow } from './game/game-logic';
 import { GameStore } from './game/game.store';
 import { COLS, GameMode, Player, PowerState, ROWS } from './game/game.types';
+import { metricView, MetricsFile } from './metrics';
+import { TooltipDirective } from './ui/tooltip.directive';
 
 type PowerView = 'available' | 'armed' | 'spent';
 
 @Component({
   selector: 'app-root',
-  imports: [DocsComponent],
+  imports: [DocsComponent, TooltipDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,10 +35,10 @@ export class AppComponent implements OnDestroy {
     const route = this.route();
     return route.view === 'docs' ? route.section : null;
   });
-  protected readonly unitMetrics = signal('unit not measured');
-  protected readonly unitFailed = signal(0);
-  protected readonly unitTip = signal('Run npm run metrics to measure again');
-  protected readonly e2eMetrics = signal('e2e not measured');
+  protected readonly metrics = signal<MetricsFile>({});
+  protected readonly unitView = computed(() => metricView('Unit', this.metrics().unit));
+  protected readonly e2eView = computed(() => metricView('E2E', this.metrics().e2e));
+  protected readonly requirements = computed(() => this.metrics().requirements ?? {});
   protected readonly hoveredColumn = signal<number | null>(null);
   /** Turns a plain click into a dark drop, for players without a right mouse button. */
   protected readonly darkDropMode = signal(false);
@@ -56,8 +58,14 @@ export class AppComponent implements OnDestroy {
   }
 
   protected setMode(mode: GameMode): void {
+    this.darkDropMode.set(false);
     this.store.selectMode(mode);
     this.navigate(playHash(mode));
+  }
+
+  protected newGame(): void {
+    this.darkDropMode.set(false);
+    this.store.reset();
   }
 
   protected openDocs(): void {
@@ -77,7 +85,13 @@ export class AppComponent implements OnDestroy {
   }
 
   private applyRoute(): void {
-    const route = parseRoute(location.hash);
+    const hash = location.hash;
+    const route = resolveRoute(hash);
+    const canonical = routeHash(route);
+    if (hash !== '' && hash !== '#' && hash !== '#/' && hash !== canonical) {
+      this.navigate(canonical);
+      return;
+    }
     this.route.set(route);
     if (route.view === 'play' && this.store.mode() !== route.mode) {
       this.store.selectMode(route.mode);
@@ -90,26 +104,9 @@ export class AppComponent implements OnDestroy {
       if (!response.ok) {
         return;
       }
-      const metrics = (await response.json()) as {
-        unit?: { total?: number; coverage?: number | null; failed?: number; measured?: string };
-        e2e?: { total?: number } | null;
-      };
-      if (typeof metrics.unit?.total === 'number') {
-        const failed = metrics.unit.failed ?? 0;
-        const coverage = metrics.unit.coverage == null
-          ? ' · coverage not measured'
-          : ` · ${metrics.unit.coverage} %`;
-        this.unitFailed.set(failed);
-        this.unitMetrics.set(`unit ${metrics.unit.total} tests${failed ? ` · ${failed} failed` : coverage}`);
-        if (metrics.unit.measured) {
-          this.unitTip.set(`Measured ${metrics.unit.measured}. Run npm run metrics to measure again`);
-        }
-      }
-      if (typeof metrics.e2e?.total === 'number') {
-        this.e2eMetrics.set(`e2e ${metrics.e2e.total} journeys`);
-      }
+      this.metrics.set((await response.json()) as MetricsFile);
     } catch {
-      // No metrics file: the footer keeps "not measured".
+      // No metrics file: the footer keeps "not executed".
     }
   }
 
@@ -185,6 +182,11 @@ export class AppComponent implements OnDestroy {
 
   private isArmedAt(power: PowerState, row: number, col: number, player: Player): boolean {
     const armed = power.armed;
-    return armed !== null && armed[0] === row && armed[1] === col && this.store.board()[row][col] === player;
+    return (
+      armed !== null &&
+      armed[0] === row &&
+      armed[1] === col &&
+      this.store.board()[row][col] === player
+    );
   }
 }
