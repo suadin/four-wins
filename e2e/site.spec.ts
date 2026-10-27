@@ -30,7 +30,10 @@ async function mockVersion(page: Page, latest: string | null = '1.1.0'): Promise
     return;
   }
   await page.route('**/version.json', (route) =>
-    route.fulfill({ json: { version: latest, releasedAt: '2026-10-27', url: '#' }, headers: { 'access-control-allow-origin': '*' } }),
+    route.fulfill({
+      json: { version: latest, releasedAt: '2026-10-27', url: '#' },
+      headers: { 'access-control-allow-origin': '*' },
+    }),
   );
 }
 
@@ -93,6 +96,7 @@ test('[BASIC-READER-05] SPECS starts with one Changelog page', async ({ page }) 
   await expect(page.locator('.doc-section').first()).toHaveAttribute('data-tip', 'Changelog');
   await expect(page.getByRole('tab', { name: 'RELEASE NOTES' })).toHaveCount(0);
   await expect(page.locator('.doc-body')).toContainText('2026-10-27');
+  await expect(page.locator('.doc-body .doc-tests')).toBeVisible();
 });
 
 test('[BASIC-READER-03] sections are icons with tooltips', async ({ page }) => {
@@ -237,6 +241,12 @@ test('[BASIC-FOOTER-04] the footer is fixed and wraps cleanly', async ({ page })
   expect(box?.y ?? 9999).toBeGreaterThanOrEqual(0);
   expect((box?.y ?? 9999) + (box?.height ?? 9999)).toBeLessThanOrEqual(720);
   await expect(page.locator('.footer-item')).toHaveCount(6);
+  expect(
+    await page
+      .locator('.footer-item')
+      .first()
+      .evaluate((node) => getComputedStyle(node).whiteSpace),
+  ).toBe('nowrap');
 });
 
 test('[BASIC-DESIGN-04] the root stays at 100%', async ({ page }) => {

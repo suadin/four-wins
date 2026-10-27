@@ -42,33 +42,35 @@
       </nav>
       <h3 class="doc-section-title">{{ currentPage()?.title }}</h3>
     }
-    <article class="doc-body" [innerHTML]="safeHtml()" (click)="onBodyClick($event)"></article>
+    <article class="doc-body">
+      <div [innerHTML]="safeHtml()" (click)="onBodyClick($event)"></div>
 
-    @if (testNames(); as tests) {
-      <section class="doc-tests" aria-label="Automated tests">
-        <h4>Automated tests</h4>
-        @if (tests.unit.length) {
-          <div class="doc-test-group">
-            <span class="doc-test-kind">Unit</span>
-            <ol>
-              @for (name of tests.unit; track name) {
-                <li>{{ name }}</li>
-              }
-            </ol>
-          </div>
-        }
-        @if (tests.e2e.length) {
-          <div class="doc-test-group">
-            <span class="doc-test-kind">E2E</span>
-            <ol>
-              @for (name of tests.e2e; track name) {
-                <li>{{ name }}</li>
-              }
-            </ol>
-          </div>
-        }
-      </section>
-    }
+      @if (testNames(); as tests) {
+        <section class="doc-tests" aria-label="Automated tests">
+          <h4>Automated tests</h4>
+          @if (tests.unit.length) {
+            <div class="doc-test-group">
+              <span class="doc-test-kind">Unit</span>
+              <ol>
+                @for (name of tests.unit; track name) {
+                  <li>{{ name }}</li>
+                }
+              </ol>
+            </div>
+          }
+          @if (tests.e2e.length) {
+            <div class="doc-test-group">
+              <span class="doc-test-kind">E2E</span>
+              <ol>
+                @for (name of tests.e2e; track name) {
+                  <li>{{ name }}</li>
+                }
+              </ol>
+            </div>
+          }
+        </section>
+      }
+    </article>
   } @else if (error()) {
     <p class="reader-error">{{ error() }}</p>
   }

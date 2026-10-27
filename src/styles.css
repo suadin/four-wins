@@ -436,6 +436,7 @@ button:has([data-tip]) {
   font-size: 0.76rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .footer-item svg {
   vertical-align: -0.2rem;
