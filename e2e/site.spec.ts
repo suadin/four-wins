@@ -24,7 +24,7 @@ async function mockMetrics(page: Page): Promise<void> {
   await page.route('**/test-metrics.json', (route) => route.fulfill({ json: metrics }));
 }
 
-async function mockVersion(page: Page, latest: string | null = '1.1.0'): Promise<void> {
+async function mockVersion(page: Page, latest: string | null = '1.1.1'): Promise<void> {
   if (latest === null) {
     await page.route('**/version.json', (route) => route.abort());
     return;
@@ -56,7 +56,7 @@ test('[BASIC-FOOTER-01] footer shows six items in order', async ({ page }) => {
   const footer = page.locator('.footer');
   await expect(footer).toContainText('README');
   await expect(footer).toContainText('1.0.0');
-  await expect(footer).toContainText('1.1.0');
+  await expect(footer).toContainText('1.1.1');
   await expect(footer).toContainText('source');
   await expect(footer).toContainText('Unit');
   await expect(footer).toContainText('E2E');
@@ -273,7 +273,7 @@ test('[BASIC-VERSION-02] the Basic Specs version opens BASIC SPECS', async ({ pa
   await mockVersion(page);
   await page.goto('/');
   const basicItem = page.locator('.footer-items button').nth(2);
-  await expect(basicItem).toHaveText('1.1.0');
+  await expect(basicItem).toHaveText('1.1.1');
   await basicItem.click();
   await expect(page).toHaveURL(/#\/docs\/basic-specs$/);
   await expect(page.locator('.doc-tab.active')).toHaveText('BASIC SPECS');
