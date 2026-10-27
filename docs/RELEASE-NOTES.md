@@ -1,6 +1,6 @@
 # Release notes
 
-## 2026-10-27 — Basic Specs 1.0.0
+## 2026-10-27 — Basic Specs 1.0.2
 
 - Pinned the public Basic Specs standard in `basics.json`, `basics.lock` and `basics/`.
 - The generated `BASIC-SPECS.md` is checked against the standard and against the
