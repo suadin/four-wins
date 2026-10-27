@@ -19,6 +19,7 @@ interface CoverageEntry {
   scriptId: string;
   source: string;
   functions: CoverageFunction[];
+  sourceMap?: unknown;
 }
 
 /** Starts V8 coverage before the first navigation and stores it per test. */
@@ -30,6 +31,20 @@ export const test = base.extend({
     } finally {
       try {
         const entries = await page.coverage.stopJSCoverage();
+        for (const entry of entries) {
+          const reference = /\/\/# sourceMappingURL=([^\s]+)\s*$/m.exec(entry.source)?.[1];
+          if (!reference || reference.startsWith('data:')) {
+            continue;
+          }
+          try {
+            const response = await page.request.get(new URL(reference, entry.url).href);
+            if (response.ok()) {
+              entry.sourceMap = await response.json();
+            }
+          } catch {
+            // Coverage still records the script; only the map is missing.
+          }
+        }
         if (entries.length) {
           const dir = testInfo.outputPath();
           mkdirSync(dir, { recursive: true });

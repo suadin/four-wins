@@ -90,6 +90,7 @@ export async function lineCoverageFromTestResults(root, baseURL) {
 
   const functionsByUrl = new Map();
   const sources = new Map();
+  const sourceMaps = new Map();
   for (const file of files) {
     let entries;
     try {
@@ -108,6 +109,9 @@ export async function lineCoverageFromTestResults(root, baseURL) {
       functions.push(...(entry.functions ?? []));
       functionsByUrl.set(entry.url, functions);
       sources.set(entry.url, entry.source);
+      if (entry.sourceMap) {
+        sourceMaps.set(entry.url, entry.sourceMap);
+      }
     }
   }
 
@@ -118,7 +122,8 @@ export async function lineCoverageFromTestResults(root, baseURL) {
       if (!source) {
         continue;
       }
-      const sourceMap = await sourceMapFor({ url }, source);
+      const cachedMap = sourceMaps.get(url);
+      const sourceMap = cachedMap ? { sourcemap: cachedMap } : await sourceMapFor({ url }, source);
       if (!sourceMap) {
         continue;
       }
