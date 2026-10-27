@@ -36,14 +36,8 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Tests and metrics
-        run: pnpm metrics
-
-      - name: Build for Pages
-        run: pnpm build:pages
-
-      - name: Documentation drift check
-        run: pnpm check:docs
+      - name: Conformance, tests and build
+        run: pnpm check
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

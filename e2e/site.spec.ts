@@ -102,7 +102,7 @@ test('[BASIC-READER-03] sections are icons with tooltips', async ({ page }) => {
 test('[BASIC-READER-04] a relative markdown link opens the reader', async ({ page }) => {
   await openReader(page);
   await page.getByRole('tab', { name: 'SPECS', exact: true }).click();
-  await page.getByRole('link', { name: 'BASIC SPECS' }).click();
+  await page.getByRole('link', { name: 'BASIC SPECS', exact: true }).click();
   await expect(page.locator('.doc-tab.active')).toHaveText('SPECS Basic');
 });
 
@@ -210,4 +210,24 @@ test('[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm', async ({ p
   const first = (await tip.innerText()).split('\n')[0] ?? '';
   expect(first).toMatch(/^Measured \d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
   await expect(tip).toContainText('Measured 2026-10-27 18:09');
+});
+
+test('[BASIC-FOOTER-04] the footer is fixed and wraps cleanly', async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 720 });
+  await page.goto('/');
+  const footer = page.locator('.footer');
+  await expect(footer).toBeVisible();
+  const box = await footer.boundingBox();
+  expect(box?.y ?? 9999).toBeGreaterThanOrEqual(0);
+  expect((box?.y ?? 9999) + (box?.height ?? 9999)).toBeLessThanOrEqual(720);
+  await expect(page.locator('.footer-item')).toHaveCount(4);
+});
+
+test('[BASIC-DESIGN-04] the root stays at 100%', async ({ page }) => {
+  await page.goto('/');
+  expect(await page.evaluate(() => getComputedStyle(document.documentElement).fontSize)).toBe(
+    '16px',
+  );
+  await page.setViewportSize({ width: 800, height: 700 });
+  await expect(page.locator('.main-panel')).toBeVisible();
 });

@@ -89,7 +89,7 @@ pnpm build:pages    # production build with the /four-wins/ base href
 
 ```bash
 pnpm test           # 29 unit tests, with line coverage
-pnpm test:e2e       # 22 Playwright tests in e2e/
+pnpm test:e2e       # 24 Playwright tests in e2e/
 pnpm metrics        # run both, write public/test-metrics.json
 pnpm check          # metrics, production build, documentation drift check
 ```
@@ -117,7 +117,7 @@ multiplayer service. The reader's **API** tab shows the same file without leavin
 
 ## Design
 
-The interface follows the workspace contract and uses the diary tokens: paper, card, ink,
+The interface follows [Basic Specs](https://github.com/suadin/basic-specs) and uses the shared tokens: paper, card, ink,
 muted, hard ink shadows, dashed ink lines, Comic Sans, and the OS light/dark scheme. Yellow
 marks selection, red warns, green marks good and links, purple marks the special dark-disc
 action. The two players keep red and yellow discs because those are the game's content, not UI

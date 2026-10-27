@@ -1,7 +1,7 @@
 # App specs — Four Wins
 
 These rules are specific to Four Wins. The reusable base is in
-[BASIC SPECS](BASIC-SPECS.md). The shared workspace contract is the source for both;
+[BASIC SPECS](BASIC-SPECS.md). The shared [Basic Specs](https://github.com/suadin/basic-specs) are the source for both;
 [README](../README.md) explains setup, operation, and deployment.
 
 ## Board and rules

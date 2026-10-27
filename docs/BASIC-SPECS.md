@@ -1,133 +1,159 @@
+<!-- basic-specs: 1.0.0; generated; do not edit -->
 # Basic specs
 
-These are the reusable rules for a small, static web app in this workspace. Four Wins
-applies them directly; the game-specific rules are in [APP SPECS](APP-SPECS.md). The
-shared workspace contract is the source for both. [README](../README.md) explains
-setup, operation, and deployment.
+The reusable base for a small web app whose primary reader is a future AI session.
+Project rules stay in the app and never weaken a rule here. See
+[README](../README.md#overview) for setup, operation and deployment. A rule that does
+not apply is named with its ID, a reason and a review date in `basics.json`; it is never
+dropped silently.
 
-## Footer
+## Documents
 
-- One centred footer carries README, source, unit, and E2E, separated by `|`. Each
-  item has its own icon: README a book, source chevrons, unit a clipboard with a
-  check mark, E2E a browser with a play triangle.
-- Only README is a documentation item. It opens the reader. Source opens the
-  repository.
-- Unit and E2E show their count and line coverage separately. A failure count appears
-  only when at least one test failed, and then in red. A missing run is red and says
-  `not executed`; a run without coverage says `coverage not measured`, never `0`.
-- The footer stays on one line at desktop width and wraps cleanly when narrow.
-- The footer is fixed and always visible. The main panel scrolls.
+- **BASIC-DOCS-01** — The app has `README.md`, `APP-SPECS.md`, `BASIC-SPECS.md` and
+  `RELEASE-NOTES.md`. README explains setup, operation and deployment. APP-SPECS holds
+  the rules specific to the app. This document is generated from the pinned standard.
+- **BASIC-DOCS-02** — The root README is the single source. Copies used by the deployed
+  page are checked against their source; a copy that differs is a defect.
 
 ## Reader
 
-- The footer opens the reader in the main panel. It never covers or hides the header
-  or footer.
-- The reader lists every document as a tab: README, SPECS, SPECS Basic, RELEASE
-  NOTES, and the project's API document. No document gets its own footer item.
-- One page per level-two heading. RELEASE NOTES stays one continuous page, newest
-  first. API stays one continuous page.
-- Sections are a row of line icons, not text chips. Each icon has its own symbol, its
-  tooltip gives the heading, and the active icon is yellow and rotated by `-2deg`.
-  Within one document no icon repeats.
-- Relative Markdown links between documents open in the reader.
-- The root README is the single source. Copied deploy files are checked against their
-  source by a drift test.
+- **BASIC-READER-01** — The footer opens a documentation reader in the main panel. It
+  lists every document as a tab: README, APP SPECS, BASIC SPECS and RELEASE NOTES.
+  Only README is a footer item.
+- **BASIC-READER-02** — README and SPECS use one page per level-two heading; text before
+  the first heading is an overview. RELEASE NOTES stays one continuous page, newest
+  first. An optional API document stays continuous. The level-one title names the
+  document and is not repeated in the body.
+- **BASIC-READER-03** — Sections are a row of line icons, not text chips. Each icon
+  symbolises its section, its tooltip gives the heading, the active icon is yellow and
+  rotated by `-2deg`. Within one document no icon repeats.
+- **BASIC-READER-04** — Relative Markdown links between documents open in the reader.
+  Raw HTML is escaped before any markup is added.
+
+## Footer
+
+- **BASIC-FOOTER-01** — One centred footer carries exactly four items:
+  `README | source | unit | E2E`, separated by `|`. Each item has its own icon:
+  README a book, source chevrons, unit a clipboard with a check mark, E2E a browser
+  with a play triangle. No icon repeats.
+- **BASIC-FOOTER-02** — Unit and E2E show their count and line coverage separately.
+  A failure count appears only when at least one test failed, and then in red. A
+  missing run is red and says `not executed`; a run without coverage says
+  `coverage not measured`, never `0`.
+- **BASIC-FOOTER-03** — A measured run's tooltip always has three rows:
+  `Measured <date> <time>`, `Duration <s> s`, `Per test <s> s`. A missing value is
+  `—`. A missing run's tooltip is the single word `not executed`. Test tooltips are
+  the wide variant.
+- **BASIC-FOOTER-04** — The footer stays on one line at desktop width and wraps
+  cleanly when narrow. It is fixed and always visible; the main panel scrolls.
 
 ## Links
 
-- Every view has a stable hash: `#/play/pvp`, `#/play/ai`,
-  `#/docs/readme/tests`, `#/docs/app-specs/board-and-rules`. A reload restores the
-  view; an unknown address returns to the start.
-- Search text and mode are in the address when they define the view. Unlinkable state
-  is named in README.
-- A list, when present, pages in fixed windows with arrows and lazy loading. A bounded
-  view says there is nothing to page. Four Wins has neither a list nor a pager, and
-  README names that.
+- **BASIC-LINKS-01** — Every view has a stable hash, for example
+  `#/docs/readme/tests` or `#/play/ai`. A reload restores the view; an unknown address
+  returns to the start. Search text and mode are in the address when they define the
+  view. Unlinkable state is named in README.
 
-## Tests and coverage
+## Layout
 
-- Every app has unit tests and a Playwright E2E suite in `e2e/`. The footer shows both
-  counts separately.
-- Coverage is line coverage, measured with a real library: Node's built-in test
-  coverage for the TypeScript unit suite, Playwright `page.coverage` for browser JS.
-  It is never a placeholder.
-- Tests are always executed: a static page runs them by the named command
-  `pnpm metrics` and reads the result.
-- A missing run is red and says `not executed`. A run without coverage shows the count
-  and `coverage not measured`; a missing percentage is a defect, not a display state.
-- Every automated test names the rule it protects with a bracket tag such as
-  `[BASIC-FOOTER-02]`. Each SPECS page lists the concrete test names under
-  “Automated tests”.
-- A run's test tooltip always shows three rows: `Measured <date> <time>`,
-  `Duration <s> s`, `Per test <s> s`. A missing value is `—`. A missing run's
-  tooltip is the single word `not executed`. Test tooltips are the wide variant.
-- Bug → fix code. Change a test only for a changed requirement.
+- **BASIC-LAYOUT-01** — Header and footer are fixed and always visible; the main panel
+  scrolls. The reader opens in the main panel and never covers or hides header or
+  footer. A sidebar, when present, is fixed and becomes a horizontal strip at narrow
+  widths.
+- **BASIC-LAYOUT-02** — The header is one row: icon, title, small catch phrase and
+  actions on the right, with a dashed bottom edge.
 
-## Layout and design
+## Design
 
-- The visual reference is `repos/diary/web/style.css`. Tokens may be renamed; the
-  effect stays: paper, card, ink, muted, hard ink shadows, dashed ink lines.
-- Light and dark follow the operating system. Yellow marks selection and emphasis,
-  red warns, green marks good and links, purple marks a special action. Yellow is a
-  fill, not a second accent.
-- Type is `"Comic Sans MS","Trebuchet MS",sans-serif`; code is
-  `ui-monospace,monospace`. Headings are 800–900, body 400–500. Eyebrows are
-  `.72rem`/900/`.12em` uppercase. Dates, times, counts, and pagers use tabular
+- **BASIC-DESIGN-01** — The page follows the operating system's light/dark preference.
+  Yellow marks selection and emphasis; red warns; green marks good and links; purple
+  marks one special action. Yellow is a fill, not a second accent.
+- **BASIC-DESIGN-02** — Focus is a `3px solid green` outline with `2px` offset. Cursors
+  say what a thing does: pointer for clickable, default for text, help for a tooltip
+  without an action; a tooltip on a clickable item uses the pointer.
+- **BASIC-DESIGN-03** — The visual language is paper, card, ink and muted, with `2px`
+  ink outlines, hard offset shadows, dashed ink lines and speech-bubble tooltips. Type
+  is `"Comic Sans MS","Trebuchet MS",sans-serif`; code is `ui-monospace,monospace`.
+  Headings are 800–900, body 400–500. Dates, times, counts and pagers use tabular
   numerals.
-- The root stays at `100%`. Sizes use `rem`, widths use `clamp()`, so browser zoom
-  scales the page and the layout fits at 80–200%.
-- Header and footer are fixed. The header is one row: icon, `1.5rem`/900 title, small
-  catch phrase, actions right. Both header and footer use a dashed ink line.
-- Cards use `2px solid ink`, radius `.625–1.5rem`, hard shadow `4px 4px 0 ink`;
-  large panels may use `9px`. Focus is `3px solid green` with offset `2px`.
-- Buttons use `2px solid ink`, radius `.75rem`, shadow `4px 4px 0 ink`, and on hover
-  `translate(2px,2px)` with a `2px` shadow. Icon sections are `2.5rem` squares.
-- Tooltips are ink bubbles with paper text, a rotated square arrow, and
-  `white-space: pre-line`; hover and focus only. They never replace `aria-label`.
-- Cursors: pointer for clickable, default for plain text, `help` for a tooltip
-  without an action. Tooltip plus clickable uses the pointer.
-- All motion is behind `prefers-reduced-motion`. Use one name for one thing and short
-  sentences.
+- **BASIC-DESIGN-04** — The root stays at `100%`. Sizes use `rem`, widths use
+  `clamp()`, so browser zoom scales the page and the layout fits at 80–200%. All motion
+  sits behind `prefers-reduced-motion`.
 
 ## Dates
 
-Dates use `yyyy-mm-dd` and times use `hh24:mi`.
+- **BASIC-DATES-01** — Dates use `yyyy-mm-dd`, times use `hh24:mi`.
 
 ## Data and access
 
-Four Wins is a static page. It reads only; it has no token, no account, no private
-data, and no browser mutation.
+- **BASIC-DATA-01** — Private data lives outside the repository; only generated sample
+  data may be public. One token has one `secrets/` file and never appears in the
+  repository, README, screenshot or log. A static page reads only.
+- **BASIC-DATA-02** — Local human edits need no sign-in. Browser mutations are
+  same-origin to loopback or to the exact configured HTTPS origin. That check is not
+  authentication for a LAN or internet service.
 
-## Automated tests
+## Tests
 
-Unit tests:
+- **BASIC-TESTS-01** — Every app has unit tests and a Playwright E2E suite in `e2e/`.
+  The footer shows both counts. Tests always run; a static page runs them by a named
+  command and reads the result.
+- **BASIC-TESTS-02** — Coverage is line coverage and is measured with a real library:
+  Node's built-in test coverage or Python's `trace` for unit code, Playwright
+  `page.coverage` for browser JavaScript. A missing percentage is a defect, not a
+  display state.
+- **BASIC-TESTS-03** — Every test that protects a rule here carries the rule ID in its
+  name or docstring, or the app maps the rule to the test in `basics.json`. Each
+  MUST rule has a test, a built-in check, or an approved deviation.
 
+## Quality
+
+- **BASIC-QUALITY-01** — A profile may require static analysis: typecheck, lint,
+  formatter check, link check, secret scan. The app supplies the command; the standard
+  supplies the rule. New quality rules enter as advisory in a minor version and become
+  mandatory in the next major version.
+
+## Done
+
+README and specs updated; unit tests green and metrics regenerated; E2E green where
+present; `basics check` green; committed, pushed and deployed where a rollout exists.
+
+## This app
+
+- Name: `four-wins`
+- Standard: **1.0.0**
+- Profiles: `web-static`
+- Source: https://github.com/suadin/basic-specs
+
+### Deviations
+
+None.
+
+### Automated tests
+
+- `[BASIC-READER-01] reader lists every document`
 - `[BASIC-READER-02] a heading becomes a slug`
 - `[BASIC-READER-02] a document is split at level-two headings`
 - `[BASIC-READER-02] repeated headings get their own slug`
 - `[BASIC-READER-02] release notes stay one continuous page`
+- `[BASIC-READER-02] release notes stay one page`
 - `[BASIC-READER-03] sections pick an icon and fall back to a dot`
 - `[BASIC-READER-03] section icons are unique within one document`
+- `[BASIC-READER-03] sections are icons with tooltips`
 - `[BASIC-READER-04] html is escaped before markup is added`
 - `[BASIC-READER-04] markdown renders lists, tables and code`
 - `[BASIC-READER-04] relative markdown links map to reader documents`
+- `[BASIC-READER-04] a relative markdown link opens the reader`
+- `[BASIC-FOOTER-01] footer shows README, source, unit and E2E icons`
+- `[BASIC-FOOTER-02] metric labels show count and coverage`
+- `[BASIC-FOOTER-02] footer shows counts and coverage`
+- `[BASIC-FOOTER-03] measurement tooltips have three rows`
+- `[BASIC-FOOTER-03] a missing run is not executed`
+- `[BASIC-FOOTER-03] test tooltip has three rows`
+- `[BASIC-FOOTER-04] the footer is fixed and wraps cleanly`
 - `[BASIC-LINKS-01] routes survive a reload`
 - `[BASIC-LINKS-01] address helpers agree with the parser`
 - `[BASIC-LINKS-01] unknown routes return to the start`
-- `[BASIC-FOOTER-02] metric labels show count and coverage`
-- `[BASIC-FOOTER-03] measurement tooltips have three rows`
-- `[BASIC-FOOTER-03] a missing run is not executed`
-- `[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm`
-
-E2E tests:
-
-- `[BASIC-FOOTER-01] footer shows README, source, unit and E2E icons`
-- `[BASIC-FOOTER-02] footer shows counts and coverage`
-- `[BASIC-FOOTER-03] test tooltip has three rows`
-- `[BASIC-READER-01] reader lists every document`
-- `[BASIC-READER-02] release notes stay one page`
-- `[BASIC-READER-03] sections are icons with tooltips`
-- `[BASIC-READER-04] a relative markdown link opens the reader`
 - `[BASIC-LINKS-01] a reload restores the docs section`
 - `[BASIC-LINKS-01] an unknown address returns to the start`
 - `[BASIC-LAYOUT-01] header and footer stay visible while the main panel scrolls`
@@ -135,4 +161,6 @@ E2E tests:
 - `[BASIC-LAYOUT-02] header is one row with actions on the right`
 - `[BASIC-DESIGN-01] the page follows the OS colour scheme`
 - `[BASIC-DESIGN-02] focus uses the green outline`
+- `[BASIC-DESIGN-04] the root stays at 100%`
+- `[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm`
 - `[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm`

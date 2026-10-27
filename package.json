@@ -11,7 +11,8 @@
     "test:e2e": "playwright test",
     "metrics": "node scripts/metrics.mjs",
     "check:docs": "node scripts/check-docs.mjs",
-    "check": "pnpm metrics && pnpm build && pnpm check:docs"
+    "check": "pnpm metrics && pnpm build:pages && pnpm check:docs && pnpm basics check",
+    "basics": "python3 basics/check.py --root ."
   },
   "private": true,
   "packageManager": "pnpm@10.1.0",

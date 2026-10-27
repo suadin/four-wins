@@ -3,19 +3,19 @@
     "tests": 29,
     "failures": 0,
     "coverage": 95.63,
-    "measuredAt": "2026-10-27T19:10",
-    "durationSeconds": 0.266,
-    "perTest": 0.0092
+    "measuredAt": "2026-10-27T20:31",
+    "durationSeconds": 0.277,
+    "perTest": 0.0096
   },
   "e2e": {
-    "tests": 22,
+    "tests": 24,
     "failures": 0,
-    "coverage": 77.99,
-    "coveredLines": 1492,
+    "coverage": 78.09,
+    "coveredLines": 1494,
     "totalLines": 1913,
-    "measuredAt": "2026-10-27T19:11",
-    "durationSeconds": 15.137,
-    "perTest": 0.688
+    "measuredAt": "2026-10-27T20:31",
+    "durationSeconds": 16.978,
+    "perTest": 0.7074
   },
   "requirements": {
     "app-specs": {
@@ -78,7 +78,9 @@
         "[BASIC-LAYOUT-02] header is one row with actions on the right",
         "[BASIC-DESIGN-01] the page follows the OS colour scheme",
         "[BASIC-DESIGN-02] focus uses the green outline",
-        "[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm"
+        "[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm",
+        "[BASIC-FOOTER-04] the footer is fixed and wraps cleanly",
+        "[BASIC-DESIGN-04] the root stays at 100%"
       ]
     }
   }
