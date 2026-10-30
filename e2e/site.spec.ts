@@ -1,4 +1,15 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { expect, test } from './fixtures';
+
+// The standard moves; the suite must not. The versions come from the app's own runtime
+// metadata, and the "newer" case is derived from that major.
+const RUNTIME = JSON.parse(readFileSync(join(process.cwd(), 'public/basic-specs.json'), 'utf8'));
+const STANDARD = RUNTIME.standard;
+const [MAJOR, MINOR] = STANDARD.split('.').map(Number);
+const NEXT_MINOR = `${MAJOR}.${MINOR + 1}.0`;
+const NEXT_MAJOR = `${MAJOR + 1}.0.0`;
+
 import type { Page } from '@playwright/test';
 
 const metrics = {
@@ -24,7 +35,7 @@ async function mockMetrics(page: Page): Promise<void> {
   await page.route('**/test-metrics.json', (route) => route.fulfill({ json: metrics }));
 }
 
-async function mockVersion(page: Page, latest: string | null = '1.1.1'): Promise<void> {
+async function mockVersion(page: Page, latest: string | null = STANDARD): Promise<void> {
   if (latest === null) {
     await page.route('**/version.json', (route) => route.abort());
     return;
@@ -56,7 +67,7 @@ test('[BASIC-FOOTER-01] footer shows six items in order', async ({ page }) => {
   const footer = page.locator('.footer');
   await expect(footer).toContainText('README');
   await expect(footer).toContainText('1.0.0');
-  await expect(footer).toContainText('1.1.1');
+  await expect(footer).toContainText(STANDARD);
   await expect(footer).toContainText('source');
   await expect(footer).toContainText('Unit');
   await expect(footer).toContainText('E2E');
@@ -273,19 +284,20 @@ test('[BASIC-VERSION-02] the Basic Specs version opens BASIC SPECS', async ({ pa
   await mockVersion(page);
   await page.goto('/');
   const basicItem = page.locator('.footer-items button').nth(2);
-  await expect(basicItem).toHaveText('1.1.1');
+  await expect(basicItem).toHaveText(STANDARD);
   await basicItem.click();
   await expect(page).toHaveURL(/#\/docs\/basic-specs$/);
   await expect(page.locator('.doc-tab.active')).toHaveText('BASIC SPECS');
 });
 
 test('[BASIC-VERSION-03] only a major update turns red', async ({ page }) => {
-  await mockVersion(page, '1.2.0');
+  await mockVersion(page, NEXT_MINOR);
   await page.goto('/');
   const basicItem = page.locator('.footer-items button').nth(2);
   await expect(basicItem).not.toHaveClass(/outdated/);
-  await expect(basicItem).toHaveAttribute('data-tip', /1\.2\.0 available/);
-  await mockVersion(page, '2.0.0');
+  await expect(basicItem).toHaveAttribute(
+    'data-tip', new RegExp(`${NEXT_MINOR.replaceAll('.', '\\.')} available`));
+  await mockVersion(page, NEXT_MAJOR);
   await page.reload();
   await expect(basicItem).toHaveClass(/outdated/);
   await expect(basicItem).toHaveAttribute('data-tip', /2\.0\.0 available/);
