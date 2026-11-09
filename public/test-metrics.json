@@ -1,95 +1,20 @@
 {
   "unit": {
-    "tests": 33,
+    "tests": 13,
     "failures": 0,
-    "coverage": 95.45,
-    "measuredAt": "2026-10-27T22:58",
-    "durationSeconds": 0.274,
-    "perTest": 0.0083
+    "coverage": 95.65,
+    "measuredAt": "2026-11-09T09:02",
+    "durationSeconds": 0.242,
+    "perTest": 0.0186
   },
   "e2e": {
-    "tests": 28,
+    "tests": 7,
     "failures": 0,
-    "coverage": 79.28,
-    "coveredLines": 1650,
-    "totalLines": 2081,
-    "measuredAt": "2026-10-27T22:58",
-    "durationSeconds": 19.5,
-    "perTest": 0.6964
-  },
-  "requirements": {
-    "app-specs": {
-      "unit": [
-        "[GAME-01] an empty board has the agreed shape",
-        "[GAME-02] the opponent swaps players",
-        "[GAME-03] a disc falls to the lowest free row and the old board stays",
-        "[GAME-04] a full column refuses another disc",
-        "[GAME-05] four discs in a row are a line win",
-        "[GAME-05] four discs in a column are a line win",
-        "[GAME-05] four discs on a diagonal are a line win",
-        "[GAME-06] a filled 2x2 block wins as well",
-        "[GAME-07] a full board is a draw",
-        "[GAME-08] a conversion turns one disc and leaves the rest alone",
-        "[GAME-08] a conversion picks an opposing neighbour",
-        "[GAME-10] the best move takes an immediate win",
-        "[GAME-10] the AI action is a legal column for an empty board"
-      ],
-      "e2e": [
-        "[GAME-03] a disc falls into the clicked column",
-        "[GAME-05] four in a row wins and highlights",
-        "[GAME-06] a 2x2 block wins",
-        "[GAME-08] the dark disc converts a neighbour",
-        "[GAME-09] using the dark disc costs a move",
-        "[GAME-11] the mode switch updates the address",
-        "[GAME-12] new game resets the board"
-      ]
-    },
-    "basic-specs": {
-      "unit": [
-        "[BASIC-READER-02] a heading becomes a slug",
-        "[BASIC-READER-02] a document is split at level-two headings",
-        "[BASIC-READER-02] repeated headings get their own slug",
-        "[BASIC-READER-05] SPECS starts with one Changelog page",
-        "[BASIC-READER-03] sections pick an icon and fall back to a dot",
-        "[BASIC-READER-03] section icons are unique within one document",
-        "[BASIC-READER-04] html is escaped before markup is added",
-        "[BASIC-READER-04] markdown renders lists, tables and code",
-        "[BASIC-READER-04] relative markdown links map to reader documents",
-        "[BASIC-LINKS-01] routes survive a reload",
-        "[BASIC-LINKS-01] address helpers agree with the parser",
-        "[BASIC-LINKS-01] unknown routes return to the start",
-        "[BASIC-FOOTER-02] metric labels show count and coverage",
-        "[BASIC-FOOTER-03] measurement tooltips have three rows",
-        "[BASIC-FOOTER-03] a missing run is not executed",
-        "[BASIC-DATES-01] measured dates use yyyy-mm-dd hh:mm",
-        "[BASIC-VERSION-01] the app version opens SPECS with a tooltip",
-        "[BASIC-VERSION-02] the Basic Specs version carries its version",
-        "[BASIC-VERSION-03] only major updates are outdated",
-        "[BASIC-VERSION-04] an unknown latest stays neutral"
-      ],
-      "e2e": [
-        "[BASIC-FOOTER-01] footer shows six items in order",
-        "[BASIC-FOOTER-02] footer shows counts and coverage",
-        "[BASIC-FOOTER-03] test tooltip has three rows",
-        "[BASIC-READER-01] reader lists every document",
-        "[BASIC-READER-05] SPECS starts with one Changelog page",
-        "[BASIC-READER-03] sections are icons with tooltips",
-        "[BASIC-READER-04] a relative markdown link opens the reader",
-        "[BASIC-LINKS-01] a reload restores the docs section",
-        "[BASIC-LINKS-01] an unknown address returns to the start",
-        "[BASIC-LAYOUT-01] header and footer stay visible while the main panel scrolls",
-        "[BASIC-LAYOUT-01] the reader does not cover header or footer",
-        "[BASIC-LAYOUT-02] header is one row with actions on the right",
-        "[BASIC-DESIGN-01] the page follows the OS colour scheme",
-        "[BASIC-DESIGN-02] focus uses the green outline",
-        "[BASIC-DATES-01] the footer measurement uses yyyy-mm-dd hh:mm",
-        "[BASIC-FOOTER-04] the footer is fixed and wraps cleanly",
-        "[BASIC-DESIGN-04] the root stays at 100%",
-        "[BASIC-VERSION-01] the app version opens SPECS and never turns red",
-        "[BASIC-VERSION-02] the Basic Specs version opens BASIC SPECS",
-        "[BASIC-VERSION-03] only a major update turns red",
-        "[BASIC-VERSION-04] an unavailable latest version stays neutral"
-      ]
-    }
+    "coverage": null,
+    "coveredLines": null,
+    "totalLines": null,
+    "measuredAt": "2026-11-09T09:02",
+    "durationSeconds": 4.996,
+    "perTest": 0.7137
   }
 }

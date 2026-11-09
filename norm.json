@@ -1,0 +1,38 @@
+{
+  "name": "four-wins",
+  "appVersion": "1.0.0",
+  "vendorDir": "public",
+  "source": "https://github.com/suadin/four-wins",
+  "profiles": [
+    "web-static"
+  ],
+  "docs": {
+    "appSpecs": "docs/APP-SPECS.md",
+    "releaseNotes": "docs/RELEASE-NOTES.md"
+  },
+  "runtime": "public/norm/app.json",
+  "metrics": "public/test-metrics.json",
+  "coverage": {
+    "unit": {
+      "command": "node --experimental-strip-types --import ./test/register.mjs --test --test-reporter=tap --experimental-test-coverage --test-coverage-include=src/app/game/*.ts test/game-logic.test.ts"
+    },
+    "e2e": {
+      "command": "pnpm exec playwright test",
+      "baseURL": "http://127.0.0.1:4173",
+      "files": []
+    }
+  },
+  "commands": {
+    "unit": "pnpm test",
+    "e2e": "pnpm test:e2e",
+    "metrics": "pnpm metrics",
+    "docs": "pnpm build:pages"
+  },
+  "allow": [
+    {
+      "rule": "NORM-TESTS-02",
+      "reason": "The browser suite's line coverage is not measured: Angular bundles the game into hashed chunks that page.coverage cannot match to source files. The unit suite's coverage is measured.",
+      "review": "2027-01-31"
+    }
+  ]
+}

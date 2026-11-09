@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -6,58 +7,56 @@ import {
   OnDestroy,
   signal,
 } from '@angular/core';
-import { DocsComponent } from './docs/docs.component';
-import { docsHash, parseRoute, playHash, resolveRoute, routeHash } from './docs/reader';
 import { getAvailableRow } from './game/game-logic';
 import { GameStore } from './game/game.store';
 import { COLS, GameMode, Player, PowerState, ROWS } from './game/game.types';
-import { metricView, MetricsFile } from './metrics';
-import { LATEST_URL, RuntimeVersion, versionView } from './version';
-import { TooltipDirective } from './ui/tooltip.directive';
 
 type PowerView = 'available' | 'armed' | 'spent';
 
+/** The game's own routing: the play view carries its mode in the hash; the
+ * documentation reader is the Norm runtime, driven through its handle. */
+function playHash(mode: GameMode): string {
+  return `#/play/${mode}`;
+}
+
 @Component({
   selector: 'app-root',
-  imports: [DocsComponent, TooltipDirective],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnDestroy, AfterViewInit {
   protected readonly store = inject(GameStore);
-  protected readonly route = signal(parseRoute(location.hash));
-  protected readonly showDocs = computed(() => this.route().view === 'docs');
-  protected readonly docsSlug = computed(() => {
-    const route = this.route();
-    return route.view === 'docs' ? route.doc : 'readme';
-  });
-  protected readonly docsSection = computed(() => {
-    const route = this.route();
-    return route.view === 'docs' ? route.section : null;
-  });
-  protected readonly metrics = signal<MetricsFile>({});
-  protected readonly runtimeVersion = signal<RuntimeVersion | null>(null);
-  protected readonly latestStandard = signal<string | null>(null);
-  protected readonly version = computed(() =>
-    versionView(this.runtimeVersion(), this.latestStandard()),
-  );
-  protected readonly unitView = computed(() => metricView('Unit', this.metrics().unit));
-  protected readonly e2eView = computed(() => metricView('E2E', this.metrics().e2e));
-  protected readonly requirements = computed(() => this.metrics().requirements ?? {});
+  protected readonly showDocs = signal(false);
   protected readonly hoveredColumn = signal<number | null>(null);
-  /** Turns a plain click into a dark drop, for players without a right mouse button. */
   protected readonly darkDropMode = signal(false);
   protected readonly columnIndexes = Array.from({ length: COLS }, (_, index) => index);
   protected readonly rowIndexes = Array.from({ length: ROWS }, (_, index) => index);
+  private norm: { open: (slug: string, section?: string | null) => void; close: () => void } | null = null;
 
   private readonly onHashChange = (): void => this.applyRoute();
 
   constructor() {
     window.addEventListener('hashchange', this.onHashChange);
+  }
+
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      const { mountNorm } = await import('@suadin/norm');
+      const response = await fetch('norm/app.json', { cache: 'no-store' });
+      const runtime = response.ok ? await response.json() : null;
+      this.norm = await mountNorm({
+        app: { name: 'four-wins', version: runtime?.appVersion ?? '1.0.0', logo: 'four-wins.svg' },
+        source: 'https://github.com/suadin/four-wins',
+        normVersion: runtime?.norm ?? '2.0.0',
+        metrics: 'test-metrics.json',
+        autoRoute: false,
+        homeHash: () => playHash(this.store.mode()),
+      });
+    } catch {
+      /* Without the package the game still works; footer and reader are absent. */
+    }
     this.applyRoute();
-    this.loadMetrics();
-    this.loadVersions();
   }
 
   ngOnDestroy(): void {
@@ -75,18 +74,6 @@ export class AppComponent implements OnDestroy {
     this.store.reset();
   }
 
-  protected openDocs(): void {
-    this.navigate(docsHash('readme'));
-  }
-
-  protected openSpecs(): void {
-    this.navigate(docsHash('app-specs'));
-  }
-
-  protected openBasicSpecs(): void {
-    this.navigate(docsHash('basic-specs'));
-  }
-
   protected closeDocs(): void {
     this.navigate(playHash(this.store.mode()));
   }
@@ -101,54 +88,17 @@ export class AppComponent implements OnDestroy {
 
   private applyRoute(): void {
     const hash = location.hash;
-    const route = resolveRoute(hash);
-    const canonical = routeHash(route);
-    if (hash !== '' && hash !== '#' && hash !== '#/' && hash !== canonical) {
-      this.navigate(canonical);
+    const doc = /^#\/docs\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?/.exec(hash);
+    if (doc) {
+      this.showDocs.set(true);
+      this.norm?.open(doc[1], doc[2] ?? null);
       return;
     }
-    this.route.set(route);
-    if (route.view === 'play' && this.store.mode() !== route.mode) {
-      this.store.selectMode(route.mode);
-    }
-  }
-
-  private async loadMetrics(): Promise<void> {
-    try {
-      const response = await fetch('test-metrics.json', { cache: 'no-store' });
-      if (!response.ok) {
-        return;
-      }
-      this.metrics.set((await response.json()) as MetricsFile);
-    } catch {
-      // No metrics file: the footer keeps "not executed".
-    }
-  }
-
-  private async loadVersions(): Promise<void> {
-    try {
-      const response = await fetch('basic-specs.json', { cache: 'no-store' });
-      if (response.ok) {
-        this.runtimeVersion.set((await response.json()) as RuntimeVersion);
-      }
-    } catch {
-      // The footer keeps the neutral placeholder.
-    }
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3000);
-    try {
-      const response = await fetch(LATEST_URL, {
-        cache: 'no-store',
-        signal: controller.signal,
-      });
-      if (response.ok) {
-        const latest = (await response.json()) as { version?: string };
-        this.latestStandard.set(latest.version ?? null);
-      }
-    } catch {
-      // The Basic Specs item stays neutral and says latest not checked.
-    } finally {
-      clearTimeout(timer);
+    this.showDocs.set(false);
+    this.norm?.close();
+    const mode: GameMode = /^#\/play\/ai$/.test(hash) ? 'ai' : 'pvp';
+    if (this.store.mode() !== mode) {
+      this.store.selectMode(mode);
     }
   }
 

@@ -48,6 +48,9 @@ importers:
       '@playwright/test':
         specifier: ^1.64.1
         version: 1.64.1
+      '@suadin/norm':
+        specifier: file:../norm
+        version: file:../norm(@playwright/test@1.64.1)
       '@types/node':
         specifier: ^26.6.5
         version: 26.6.5
@@ -1095,6 +1098,13 @@ packages:
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
+
+  '@suadin/norm@file:../norm':
+    resolution: {directory: ../norm, type: directory}
+    engines: {node: '>=22'}
+    hasBin: true
+    peerDependencies:
+      '@playwright/test': '>=1.48.0'
 
   '@types/gensync@1.0.5':
     resolution: {integrity: sha512-MbsRCT7mTikHwKZ0X+LVUTLRrZZRLipTuXEO9qOYO+zmjMVk81axyClMROf6uoPD9MRVu46bx8zoR0Ad9q3NAg==}
@@ -2734,6 +2744,10 @@ snapshots:
       - chokidar
 
   '@standard-schema/spec@1.1.0': {}
+
+  '@suadin/norm@file:../norm(@playwright/test@1.64.1)':
+    dependencies:
+      '@playwright/test': 1.64.1
 
   '@types/gensync@1.0.5': {}
 

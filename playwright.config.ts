@@ -9,7 +9,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 1 : 0,
   timeout: 30_000,
-  reporter: [['list'], ['./e2e/reporter.ts']],
+  reporter: [['list'], ['@suadin/norm/reporter']],
   outputDir: 'test-results',
   use: {
     baseURL,
