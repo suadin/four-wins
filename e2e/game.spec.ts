@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 function dropButton(page: Page, column: number) {
@@ -61,9 +61,9 @@ test('[GAME-09] using the dark disc costs a move', async ({ page }) => {
 
 test('[GAME-11] the mode switch updates the address', async ({ page }) => {
   await page.goto('/#/play/pvp');
-  await page.getByRole('button', { name: 'VS AI' }).click();
+  await page.getByRole('radio', { name: 'VS AI' }).click();
   await expect(page).toHaveURL(/#\/play\/ai$/);
-  await page.getByRole('button', { name: '1 VS 1' }).click();
+  await page.getByRole('radio', { name: '1 VS 1' }).click();
   await expect(page).toHaveURL(/#\/play\/pvp$/);
 });
 

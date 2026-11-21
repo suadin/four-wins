@@ -31,7 +31,7 @@ yarn-error.log
 
 # Test artifacts
 /test-results
-/e2e-results.json
+/test-report
 
 # Miscellaneous
 /.angular/cache
@@ -46,3 +46,5 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+/.vitest

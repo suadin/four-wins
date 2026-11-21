@@ -1,102 +1,104 @@
-<header class="topbar">
-  <div class="brand">
-    <img class="app-icon" src="four-wins.svg" alt="" />
-    <h1>Four Wins</h1>
-  </div>
-  <p class="tagline">Connect four discs in a row.</p>
+<mat-toolbar class="topbar">
+  <img class="brand-icon" src="four-wins.svg" alt="" />
+  <h1>Four Wins</h1>
+  <span class="spacer"></span>
+  <mat-button-toggle-group
+    [value]="store.mode()"
+    (change)="setMode($event.value)"
+    aria-label="Game mode"
+  >
+    <mat-button-toggle value="pvp">1 VS 1</mat-button-toggle>
+    <mat-button-toggle value="ai">VS AI</mat-button-toggle>
+  </mat-button-toggle-group>
+  <button mat-flat-button color="primary" (click)="newGame()">New game</button>
+</mat-toolbar>
 
-  <div class="top-actions">
-    <div class="mode-switch" role="group" aria-label="Game mode">
-      <button type="button" [class.active]="store.mode() === 'pvp'" (click)="setMode('pvp')">
-        1 VS 1
-      </button>
-      <button type="button" [class.active]="store.mode() === 'ai'" (click)="setMode('ai')">
-        VS AI
-      </button>
-    </div>
-    <button type="button" class="button" (click)="newGame()">New game</button>
-  </div>
-</header>
+<main class="main-panel">
+  <mat-card class="game-card" appearance="outlined" aria-label="Four Wins game">
+    <mat-card-content class="game-panel">
+      <p
+        class="status"
+        role="status"
+        aria-live="polite"
+        [class.won]="store.status() === 'won'"
+        [class.draw]="store.status() === 'draw'"
+      >
+        {{ store.statusMessage() }}
+      </p>
 
-<main id="home" class="main-panel" [hidden]="showDocs()">
-  <section class="game-panel" aria-label="Four Wins game">
-    <p
-      class="status"
-      role="status"
-      aria-live="polite"
-      [class.won]="store.status() === 'won'"
-      [class.draw]="store.status() === 'draw'"
-    >
-      {{ store.statusMessage() }}
-    </p>
+      <div class="board-area">
+        <aside class="power p1" [class.spent]="powerView(1) === 'spent'">
+          <span class="power-disc"></span>
+          <span class="power-text">{{ powerLabel(1) }}</span>
+        </aside>
 
-    <div class="board-area">
-      <aside class="power p1" [class.spent]="powerView(1) === 'spent'">
-        <span class="power-disc"></span>
-        <span class="power-text">{{ powerLabel(1) }}</span>
-      </aside>
+        <div class="board" role="group" aria-label="Four Wins board">
+          @for (col of columnIndexes; track col) {
+            <button
+              type="button"
+              class="column"
+              [disabled]="!store.canPlay()"
+              [attr.aria-label]="'Drop a disc into column ' + (col + 1)"
+              (click)="onColumnClick(col)"
+              (contextmenu)="onContextMenu($event, col)"
+              (mouseenter)="hoveredColumn.set(col)"
+              (mouseleave)="hoveredColumn.set(null)"
+              (focus)="hoveredColumn.set(col)"
+              (blur)="hoveredColumn.set(null)"
+            >
+              @for (row of rowIndexes; track row) {
+                <span
+                  class="cell"
+                  [class.p1]="store.board()[row][col] === 1"
+                  [class.p2]="store.board()[row][col] === 2"
+                  [class.dark-p1]="isDarkDisc(row, col) && store.board()[row][col] === 1"
+                  [class.dark-p2]="isDarkDisc(row, col) && store.board()[row][col] === 2"
+                  [class.armed]="isUsableDarkDisc(row, col)"
+                  [class.win]="isWinningCell(row, col)"
+                  [class.preview-p1]="
+                    row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1
+                  "
+                  [class.preview-p2]="
+                    row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2
+                  "
+                  [attr.title]="
+                    isUsableDarkDisc(row, col) ? 'Click to convert one disc around it' : null
+                  "
+                  (click)="onCellClick($event, row, col)"
+                ></span>
+              }
+            </button>
+          }
+        </div>
 
-      <div class="board" role="group" aria-label="Four Wins board">
-        @for (col of columnIndexes; track col) {
-          <button
-            type="button"
-            class="column"
-            [disabled]="!store.canPlay()"
-            [attr.aria-label]="'Drop a disc into column ' + (col + 1)"
-            (click)="onColumnClick(col)"
-            (contextmenu)="onContextMenu($event, col)"
-            (mouseenter)="hoveredColumn.set(col)"
-            (mouseleave)="hoveredColumn.set(null)"
-            (focus)="hoveredColumn.set(col)"
-            (blur)="hoveredColumn.set(null)"
-          >
-            @for (row of rowIndexes; track row) {
-              <span
-                class="cell"
-                [class.p1]="store.board()[row][col] === 1"
-                [class.p2]="store.board()[row][col] === 2"
-                [class.dark-p1]="isDarkDisc(row, col) && store.board()[row][col] === 1"
-                [class.dark-p2]="isDarkDisc(row, col) && store.board()[row][col] === 2"
-                [class.armed]="isUsableDarkDisc(row, col)"
-                [class.win]="isWinningCell(row, col)"
-                [class.preview-p1]="
-                  row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 1
-                "
-                [class.preview-p2]="
-                  row === previewRow() && col === hoveredColumn() && store.currentPlayer() === 2
-                "
-                [attr.data-tip]="
-                  isUsableDarkDisc(row, col) ? 'Click to convert one disc around it' : null
-                "
-                (click)="onCellClick($event, row, col)"
-              ></span>
-            }
-          </button>
-        }
+        <aside class="power p2" [class.spent]="powerView(2) === 'spent'">
+          <span class="power-disc"></span>
+          <span class="power-text">{{ powerLabel(2) }}</span>
+        </aside>
       </div>
 
-      <aside class="power p2" [class.spent]="powerView(2) === 'spent'">
-        <span class="power-disc"></span>
-        <span class="power-text">{{ powerLabel(2) }}</span>
-      </aside>
-    </div>
+      <p class="hint">
+        Right-click a column to drop your one dark disc. Click the dark disc to turn one opposing
+        disc around it into yours &mdash; the best placed one. That costs a move, the dark disc is
+        then a normal disc and your power is gone.
+      </p>
 
-    <p class="hint">
-      Right-click a column to drop your one dark disc. Click the dark disc to turn one opposing
-      disc around it into yours &mdash; the best placed one. That costs a move, the dark disc is
-      then a normal disc and your power is gone.
-    </p>
-
-    <div class="controls">
-      <button
-        type="button"
-        class="button button-spark dark-toggle"
-        [class.active]="darkDropMode() && store.hasDarkDisc()"
-        [disabled]="!store.canPlay() || !store.hasDarkDisc()"
-        (click)="toggleDarkDrop()"
-      >
-        Dark drop
-      </button>
-    </div>
-  </section>
+      <div class="controls">
+        <button
+          mat-stroked-button
+          color="primary"
+          class="dark-toggle"
+          [class.active]="darkDropMode() && store.hasDarkDisc()"
+          [disabled]="!store.canPlay() || !store.hasDarkDisc()"
+          (click)="toggleDarkDrop()"
+        >
+          Dark drop
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
 </main>
+
+<footer class="footer">
+  <a href="test/index.html">Tests</a>
+</footer>

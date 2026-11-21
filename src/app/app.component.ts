@@ -1,5 +1,4 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -7,55 +6,39 @@ import {
   OnDestroy,
   signal,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCardModule } from '@angular/material/card';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { getAvailableRow } from './game/game-logic';
 import { GameStore } from './game/game.store';
 import { COLS, GameMode, Player, PowerState, ROWS } from './game/game.types';
 
 type PowerView = 'available' | 'armed' | 'spent';
 
-/** The game's own routing: the play view carries its mode in the hash; the
- * documentation reader is the Norm runtime, driven through its handle. */
+/** The game's routing: the play view carries its mode in the hash. */
 function playHash(mode: GameMode): string {
   return `#/play/${mode}`;
 }
 
 @Component({
   selector: 'app-root',
+  imports: [MatButtonModule, MatButtonToggleModule, MatCardModule, MatToolbarModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent implements OnDestroy, AfterViewInit {
+export class AppComponent implements OnDestroy {
   protected readonly store = inject(GameStore);
-  protected readonly showDocs = signal(false);
   protected readonly hoveredColumn = signal<number | null>(null);
   protected readonly darkDropMode = signal(false);
   protected readonly columnIndexes = Array.from({ length: COLS }, (_, index) => index);
   protected readonly rowIndexes = Array.from({ length: ROWS }, (_, index) => index);
-  private norm: { open: (slug: string, section?: string | null) => void; close: () => void } | null = null;
 
   private readonly onHashChange = (): void => this.applyRoute();
 
   constructor() {
     window.addEventListener('hashchange', this.onHashChange);
-  }
-
-  async ngAfterViewInit(): Promise<void> {
-    try {
-      const { mountNorm } = await import('@suadin/norm');
-      const response = await fetch('norm/app.json', { cache: 'no-store' });
-      const runtime = response.ok ? await response.json() : null;
-      this.norm = await mountNorm({
-        app: { name: 'four-wins', version: runtime?.appVersion ?? '1.0.0', logo: 'four-wins.svg' },
-        source: 'https://github.com/suadin/four-wins',
-        normVersion: runtime?.norm ?? '2.0.0',
-        metrics: 'test-metrics.json',
-        autoRoute: false,
-        homeHash: () => playHash(this.store.mode()),
-      });
-    } catch {
-      /* Without the package the game still works; footer and reader are absent. */
-    }
     this.applyRoute();
   }
 
@@ -74,10 +57,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     this.store.reset();
   }
 
-  protected closeDocs(): void {
-    this.navigate(playHash(this.store.mode()));
-  }
-
   protected navigate(hash: string): void {
     if (location.hash === hash) {
       this.applyRoute();
@@ -87,16 +66,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   }
 
   private applyRoute(): void {
-    const hash = location.hash;
-    const doc = /^#\/docs\/([a-z0-9-]+)(?:\/([a-z0-9-]+))?/.exec(hash);
-    if (doc) {
-      this.showDocs.set(true);
-      this.norm?.open(doc[1], doc[2] ?? null);
-      return;
-    }
-    this.showDocs.set(false);
-    this.norm?.close();
-    const mode: GameMode = /^#\/play\/ai$/.test(hash) ? 'ai' : 'pvp';
+    const mode: GameMode = /^#\/play\/ai$/.test(location.hash) ? 'ai' : 'pvp';
     if (this.store.mode() !== mode) {
       this.store.selectMode(mode);
     }

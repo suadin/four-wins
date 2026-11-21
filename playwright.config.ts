@@ -9,10 +9,10 @@ export default defineConfig({
   forbidOnly: Boolean(process.env['CI']),
   retries: process.env['CI'] ? 1 : 0,
   timeout: 30_000,
-  reporter: [['list'], ['@suadin/norm/reporter']],
-  outputDir: 'test-results',
+  reporter: [['list'], ['html', { outputFolder: 'test-report/e2e', open: 'never' }]],
   use: {
     baseURL,
+    video: 'retain-on-failure',
     trace: 'retain-on-failure',
     colorScheme: 'light',
   },

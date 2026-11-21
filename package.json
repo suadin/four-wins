@@ -5,22 +5,22 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
-    "build:pages": "ng build --configuration production --base-href /four-wins/",
+    "build:pages": "ng build --configuration production --base-href /four-wins/ && node scripts/copy-test-reports.mjs",
     "watch": "ng build --watch --configuration development",
-    "test": "node --experimental-strip-types --import ./test/register.mjs --test --experimental-test-coverage --test-coverage-include='src/app/game/*.ts' test/game-logic.test.ts",
-    "test:e2e": "playwright test",
-    "metrics": "pnpm norm metrics",
-    "check:docs": "node scripts/check-docs.mjs",
-    "check": "pnpm metrics && pnpm build:pages && pnpm check:docs && pnpm norm check",
-    "norm": "pnpm exec norm"
+    "unit": "vitest run --reporter=html --outputFile=test-report/unit/index.html --reporter=default",
+    "e2e": "playwright test",
+    "check": "pnpm unit && pnpm e2e"
   },
   "private": true,
   "packageManager": "pnpm@10.1.0",
   "dependencies": {
+    "@angular/animations": "^22.2.3",
+    "@angular/cdk": "^22.3.0",
     "@angular/common": "^22.2.0",
     "@angular/compiler": "^22.2.0",
     "@angular/core": "^22.2.0",
     "@angular/forms": "^22.2.0",
+    "@angular/material": "^22.3.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
     "@ngrx/signals": "^22.0.1",
@@ -32,11 +32,10 @@
     "@angular/cli": "^22.2.0",
     "@angular/compiler-cli": "^22.2.0",
     "@playwright/test": "^1.64.1",
-    "@suadin/norm": "2.0.0",
     "@types/node": "^26.6.5",
-    "istanbul-lib-coverage": "^3.2.2",
+    "@vitest/ui": "^4.1.12",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
-    "v8-to-istanbul": "^9.3.0"
+    "vitest": "^4.0.0"
   }
 }

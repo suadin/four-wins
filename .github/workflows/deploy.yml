@@ -18,10 +18,12 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout, pnpm and Node
-        uses: suadin/basic-specs/.github/actions/setup@v1.2.1
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
         with:
-          cache: "true"
+          node-version: "22"
+          cache: pnpm
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -29,8 +31,11 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Conformance, tests and build
+      - name: Tests (unit + e2e)
         run: pnpm check
+
+      - name: Build for GitHub Pages (copies test reports into dist)
+        run: pnpm build:pages
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

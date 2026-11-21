@@ -47,22 +47,9 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "README.md",
-                "input": ".",
-                "output": "/"
-              },
-              {
-                "glob": "**/*",
-                "input": "docs",
-                "output": "/docs"
               }
             ],
-            "styles": [
-              "node_modules/@suadin/norm/src/runtime/norm.css",
-              "src/styles.css"
-            ]
+            "styles": ["src/styles.scss"]
           },
           "configurations": {
             "production": {
